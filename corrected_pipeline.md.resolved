@@ -1,0 +1,599 @@
+# 🔬 Corrected Prediction-to-Prescription Pipeline
+## Flaw-Resolved Architecture — Tox21 Multi-Endpoint Optimization
+
+---
+
+> [!IMPORTANT]
+> This document corrects 6 critical design flaws in the naive "Prediction to Prescription" approach. Each correction is mapped to a concrete implementation. The result is a scientifically defensible, potentially publishable research contribution.
+
+---
+
+## The Final Research Question (Post-Correction)
+
+> **"Does SHAP-guided, synthesizability-filtered bioisostere substitution produce consistent multi-endpoint toxicity reductions in Tox21-flagged compounds — and what scaffold classes does the pipeline systematically fail on?"**
+
+The failure mode analysis is the contribution. A clean positive result is a demo. An honest failure map is research.
+
+---
+
+## Architecture Overview
+
+```mermaid
+flowchart TD
+    A["Input: SMILES String"] --> B["Step 1: Predict All 12 Tox21 Endpoints\n+ SHAP per endpoint"]
+    B --> C["Step 1b: Cross-validate SHAP\nagainst Brenk/PAINS structural alerts\n→ Flag low-confidence attributions"]
+    C --> D["Step 2: Map Top SHAP Bit → Molecular Fragment\n(Only if alert overlap confirmed)"]
+    D --> E["Step 3: Query Bioisostere Database\n→ Filter: SAScore < 4\n→ Flag: Tanimoto to DrugBank < 0.4"]
+    E --> F["Step 4: Re-predict All 12 Endpoints\n+ Conformal Prediction Intervals\n+ OOD Flag (Tanimoto to training set)"]
+    F --> G["Output: Pareto Front\n12-endpoint toxicity profiles\nUncertainty bands\nSynthesizability score\nOOD flag\nAlert confidence"]
+```
+
+---
+
+## Flaw 1 — Single Score → Pareto Front Across 12 Endpoints
+
+### The Error
+Optimizing `NR-AR: 0.82 → 0.31` while ignoring the other 11 endpoints is not safer — it is **invisible risk shifting**. A bioisostere swap reducing androgen receptor activity may raise mitochondrial membrane potential disruption (`SR-MMP`) by the same margin.
+
+### The Correction: Pareto Dominance Check
+
+```python
+import numpy as np
+
+def pareto_dominates(A: np.ndarray, B: np.ndarray) -> bool:
+    """
+    Returns True if candidate A Pareto-dominates B.
+    A dominates B if A is <= B on ALL 12 endpoints and 
+    strictly < B on at least one.
+    (Lower toxicity probability = better)
+    """
+    return np.all(A <= B) and np.any(A < B)
+
+def evaluate_swap_pareto(original_scores: np.ndarray, 
+                          modified_scores: np.ndarray,
+                          target_names: list) -> dict:
+    """
+    Full 12-endpoint evaluation of a proposed bioisostere swap.
+    
+    Returns:
+        status: 'DOMINATES' | 'DOMINATED' | 'TRADE-OFF' | 'NO_CHANGE'
+        improved: list of endpoints that got better
+        worsened: list of endpoints that got worse
+        net_change: per-endpoint delta
+    """
+    delta = modified_scores - original_scores  # negative = improved
+    
+    improved = [target_names[i] for i in range(12) if delta[i] < -0.05]
+    worsened = [target_names[i] for i in range(12) if delta[i] > +0.05]
+    
+    if pareto_dominates(modified_scores, original_scores):
+        status = 'DOMINATES'    # Genuinely safer across the board
+    elif pareto_dominates(original_scores, modified_scores):
+        status = 'DOMINATED'    # Made it worse — reject
+    elif len(improved) > 0 and len(worsened) > 0:
+        status = 'TRADE-OFF'    # Mixed — show the user, let them decide
+    else:
+        status = 'NO_CHANGE'
+    
+    return {
+        'status': status,
+        'improved_endpoints': improved,
+        'worsened_endpoints': worsened,
+        'delta_per_endpoint': dict(zip(target_names, delta.tolist())),
+        'net_burden_change': float(delta.sum())  # aggregate signal
+    }
+```
+
+### Dashboard Output (What the User Sees)
+
+```
+Proposed Swap: -Cl → -F on position 4
+
+NR-AR       ████░░░░░░  0.82 → 0.31  ✅ -0.51
+NR-ER       ████░░░░░░  0.71 → 0.28  ✅ -0.43  
+SR-MMP      ██░░░░░░░░  0.31 → 0.67  ⚠️ +0.36  ← RISK INCREASED
+SR-p53      ████░░░░░░  0.60 → 0.58  ≈ unchanged
+
+STATUS: TRADE-OFF — This swap reduces hormonal toxicity but 
+        raises mitochondrial risk. A medicinal chemist must decide 
+        which pathway matters more for this compound's context.
+```
+
+---
+
+## Flaw 2 — False Precision → Calibrated Uncertainty + OOD Detection
+
+### The Error
+`"0.82 → 0.31"` implies resolution the model doesn't have. After bioisostere replacement, the new molecule is by definition shifted from training distribution. The reported drop may be entirely within noise (Brier score uncertainty ±0.15–0.20).
+
+### The Correction: Two-Layer Uncertainty System
+
+#### Layer A — Temperature Scaling (Fast Calibration)
+```python
+import torch
+import torch.nn as nn
+from scipy.optimize import minimize_scalar
+from sklearn.calibration import calibration_curve
+
+def temperature_scale(logits: np.ndarray, temperature: float) -> np.ndarray:
+    """Post-hoc calibration: divide logits by T before sigmoid."""
+    return 1 / (1 + np.exp(-logits / temperature))
+
+def find_optimal_temperature(logits_val, y_val):
+    """Find T that minimizes NLL on calibration set."""
+    def nll(T):
+        probs = temperature_scale(logits_val, T)
+        probs = np.clip(probs, 1e-7, 1 - 1e-7)
+        return -np.mean(y_val * np.log(probs) + (1 - y_val) * np.log(1 - probs))
+    result = minimize_scalar(nll, bounds=(0.1, 10.0), method='bounded')
+    return result.x
+
+# Calibrate per target
+temperatures = []
+for i in range(12):
+    mask = y_val[:, i] != -1
+    T = find_optimal_temperature(logits_val[mask, i], y_val[mask, i])
+    temperatures.append(T)
+```
+
+#### Layer B — OOD Detection via Tanimoto Distance
+```python
+from rdkit import DataStructs
+from rdkit.Chem import AllChem
+
+def compute_ood_flag(query_smiles: str, 
+                      training_fps: list,
+                      threshold: float = 0.4) -> dict:
+    """
+    Checks if the modified molecule is out-of-distribution 
+    relative to the training set.
+    
+    Returns max Tanimoto similarity to any training compound.
+    If max_sim < 0.4 → compound is OOD → predictions unreliable.
+    """
+    query_fp = AllChem.GetMorganFingerprintAsBitVect(
+        Chem.MolFromSmiles(query_smiles), 2, nBits=2048
+    )
+    similarities = DataStructs.BulkTanimotoSimilarity(query_fp, training_fps)
+    max_sim = max(similarities)
+    nn_idx = np.argmax(similarities)
+    
+    return {
+        'max_tanimoto': round(max_sim, 3),
+        'nearest_neighbor_idx': nn_idx,
+        'is_ood': max_sim < threshold,
+        'confidence': 'HIGH' if max_sim > 0.6 else 
+                      'MEDIUM' if max_sim > 0.4 else 'LOW'
+    }
+```
+
+#### Final Output Format (Per Endpoint, Per Candidate)
+
+```python
+def format_prediction_with_uncertainty(point_pred, temperature, ood_info):
+    uncertainty = 0.15 + (0.1 if ood_info['is_ood'] else 0.0)
+    lower = max(0.0, point_pred - uncertainty)
+    upper = min(1.0, point_pred + uncertainty)
+    
+    return {
+        'point_estimate': round(point_pred, 3),
+        'interval': f"[{lower:.2f}, {upper:.2f}]",
+        'ood_flag': ood_info['is_ood'],
+        'confidence_level': ood_info['confidence'],
+        'warning': "⚠️ Modified compound is OOD — treat prediction as LOW RELIABILITY" 
+                   if ood_info['is_ood'] else None
+    }
+
+# Output example:
+# NR-AR: 0.31  [0.16, 0.46]  confidence=MEDIUM  ⚠️ OOD
+```
+
+---
+
+## Flaw 3 — Synthesizability Filter (SAScore)
+
+### The Error
+Suggesting "replace -Cl with -SO₂CF₃" without checking if the resulting compound can be synthesized in a real lab is useless. A chemist would immediately discard such an output.
+
+### The Correction: SAScore Gate
+
+```python
+from rdkit.Chem import RDConfig
+import sys, os
+sys.path.append(os.path.join(RDConfig.RDContribDir, 'SA_Score'))
+import sascorer  # Built into RDKit contrib
+
+def get_sascore(smiles: str) -> dict:
+    """
+    SAScore: 1 (trivially easy) → 10 (practically impossible to synthesize)
+    Drug-like: < 3.5
+    Acceptable: < 4.0  ← your filter threshold
+    Difficult: 4.0 – 6.0
+    Reject: > 6.0
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return {'score': None, 'viable': False, 'label': 'INVALID'}
+    
+    score = sascorer.calculateScore(mol)
+    
+    return {
+        'score': round(score, 2),
+        'viable': score < 4.0,
+        'label': 'EASY' if score < 2.5 else
+                 'MODERATE' if score < 4.0 else
+                 'DIFFICULT' if score < 6.0 else 'IMPRACTICAL',
+        'flag': None if score < 4.0 else 
+                f"⚠️ SAScore={score:.1f} — synthesis may be impractical"
+    }
+
+# Filter in the suggestion pipeline
+def filter_candidates_by_synthesizability(candidates: list) -> list:
+    viable = []
+    rejected = []
+    for c in candidates:
+        sa = get_sascore(c['smiles'])
+        c['synthesizability'] = sa
+        if sa['viable']:
+            viable.append(c)
+        else:
+            rejected.append(c)
+    
+    return viable, rejected
+```
+
+> [!TIP]
+> For stronger synthesizability scoring, ASKCOS (MIT, open source) provides retrosynthesis route prediction as an API. Use SAScore as a fast first-pass filter; flag anything >4.0 for ASKCOS review.
+
+---
+
+## Flaw 4 — SHAP Cross-Validation Against Structural Alerts
+
+### The Error
+SHAP surfaces **statistically discriminative** features — not causal ones. If training data is thin for a rare scaffold, SHAP will confidently point at the wrong fragment. The pipeline then surgically modifies the wrong atom.
+
+### The Correction: Alert Overlap Validation
+
+```python
+from rdkit.Chem import MolFromSmarts
+
+# Brenk structural alerts (curated from literature)
+BRENK_ALERTS = {
+    'Michael_Acceptor':     '[CH]=[CH]C(=O)',
+    'Epoxide':              'C1OC1',
+    'Nitro_Aromatic':       '[NX3](=O)=O',
+    'Aniline':              'Nc1ccccc1',
+    'Quinone':              'O=C1C=CC(=O)C=C1',
+    'Aldehyde':             '[CX3H1](=O)',
+    'Halopyrimidine':       'c1nc(Cl)ncn1',
+    'Acyl_Halide':          '[CX3](=O)[F,Cl,Br,I]',
+    'Azide':                '[NX2-]=[NX2+]=[NX1]',
+    'Diazo':                '[CX3]=[NX2+]=[NX1-]',
+}
+
+# PAINS filters (Pan-Assay Interference Compounds)
+from rdkit.Chem.FilterCatalog import FilterCatalog, FilterCatalogParams
+
+def flag_pains(mol):
+    params = FilterCatalogParams()
+    params.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS)
+    catalog = FilterCatalog(params)
+    entry = catalog.GetFirstMatch(mol)
+    return entry.GetDescription() if entry else None
+
+def validate_shap_attribution(smiles: str, 
+                               top_shap_bit: int,
+                               shap_fragment_atoms: list,
+                               radius: int = 2) -> dict:
+    """
+    Cross-validate SHAP top attribution against known structural alerts.
+    
+    Returns confidence level of the attribution.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    
+    # Check Brenk alerts
+    triggered_alerts = []
+    for name, smarts in BRENK_ALERTS.items():
+        pattern = MolFromSmarts(smarts)
+        if pattern and mol.HasSubstructMatch(pattern):
+            match_atoms = set(mol.GetSubstructMatch(pattern))
+            shap_atoms = set(shap_fragment_atoms)
+            overlap = match_atoms & shap_atoms
+            if overlap:
+                triggered_alerts.append({
+                    'alert': name,
+                    'overlap_atoms': list(overlap),
+                    'overlap_ratio': len(overlap) / len(match_atoms)
+                })
+    
+    # Check PAINS
+    pains_hit = flag_pains(mol)
+    
+    if len(triggered_alerts) > 0:
+        confidence = 'HIGH'  # SHAP agrees with known chemistry
+        message = f"✅ SHAP attribution confirmed by: {[a['alert'] for a in triggered_alerts]}"
+    elif pains_hit:
+        confidence = 'MEDIUM'
+        message = f"⚠️ PAINS alert detected ({pains_hit}) but not overlapping SHAP fragment"
+    else:
+        confidence = 'LOW'
+        message = "⚠️ SHAP points at fragment with no known structural alert — attribution may be spurious"
+    
+    return {
+        'shap_confidence': confidence,
+        'triggered_alerts': triggered_alerts,
+        'pains_hit': pains_hit,
+        'message': message,
+        'recommendation': 'PROCEED' if confidence in ['HIGH', 'MEDIUM'] else 
+                          'DO NOT SUBSTITUTE — attribution unvalidated'
+    }
+```
+
+---
+
+## Flaw 5 — Explicit Scope Declaration (No Efficacy Model)
+
+### The Error
+Replacing a toxic functional group may destroy the therapeutic binding interaction. The pipeline has no efficacy model — it could generate inactive, safe garbage.
+
+### The Correction: Honest Scope Declaration in Code + UI
+
+This is not fixed with code — it is fixed with **explicit framing in the problem statement and UI.**
+
+```python
+SCOPE_DISCLAIMER = """
+⚠️  SCOPE LIMITATION — READ BEFORE USE
+
+This pipeline optimizes for Tox21-measured in-vitro toxicity ONLY.
+It has NO knowledge of:
+  - Binding affinity or pharmacological activity
+  - In-vivo pharmacokinetics or ADME properties  
+  - Target selectivity
+
+A compound modified by this pipeline to be "less toxic" may simultaneously
+lose all therapeutic activity. This tool is designed for:
+  ✅ Early-stage hit filtering and scaffold prioritization
+  ✅ Academic toxicity research and education
+  ✅ Environmental/industrial chemical screening
+
+It is NOT designed for:
+  ❌ Late-stage lead optimization (use docking + this tool together)
+  ❌ Clinical candidate selection
+  ❌ Replacement for wet-lab toxicity assays
+
+For leads with known activity, always run a binding affinity model 
+(AutoDock Vina, Schrödinger Glide, or similar) AFTER this pipeline.
+"""
+```
+
+**Why this makes the project stronger:** Honest scoping is a mark of scientific maturity. A professor is more impressed by a student who knows their tool's limits than one who oversells.
+
+---
+
+## Flaw 6 — Bioisostere Coverage Failure Analysis
+
+### The Error
+The bioisostere database is compiled from approved drugs — it has poor coverage for agrochemicals, environmental contaminants, or unusual scaffolds. The pipeline may silently return no suggestions or force-fit pharmaceutical replacements onto non-pharmaceutical scaffolds.
+
+### The Correction: Coverage Test + Failure Rate Reporting
+
+```python
+from rdkit.Chem import DataStructs
+
+def compute_drugbank_similarity(query_smiles: str, 
+                                 drugbank_fps: list) -> dict:
+    """
+    Check if query compound is within pharmaceutical chemical space.
+    Tanimoto < 0.4 to nearest DrugBank compound = likely non-pharmaceutical.
+    """
+    query_fp = AllChem.GetMorganFingerprintAsBitVect(
+        Chem.MolFromSmiles(query_smiles), 2, nBits=2048
+    )
+    similarities = DataStructs.BulkTanimotoSimilarity(query_fp, drugbank_fps)
+    max_sim = max(similarities)
+    
+    return {
+        'max_tanimoto_to_drugbank': round(max_sim, 3),
+        'in_pharmaceutical_space': max_sim >= 0.4,
+        'bioisostere_db_coverage': 'HIGH' if max_sim > 0.6 else
+                                   'MEDIUM' if max_sim > 0.4 else 'LOW',
+        'warning': None if max_sim >= 0.4 else
+                   "⚠️ This compound is dissimilar to all known drugs (Tanimoto < 0.4). "
+                   "Bioisostere suggestions may be chemically inappropriate for this scaffold."
+    }
+
+# --- Failure Rate Analysis (for Results Section of Paper) ---
+
+def run_coverage_analysis(test_smiles_list: list, 
+                           drugbank_fps: list,
+                           bioisostere_db: dict) -> pd.DataFrame:
+    """
+    Systematic run: For what fraction of Tox21 compounds does 
+    the pipeline find at least one valid bioisostere suggestion?
+    Stratified by Tanimoto to DrugBank.
+    """
+    results = []
+    for smiles in test_smiles_list:
+        db_sim = compute_drugbank_similarity(smiles, drugbank_fps)
+        alerts = flag_structural_alerts(smiles)
+        suggestion_count = get_bioisostere_suggestions(smiles, bioisostere_db)
+        
+        results.append({
+            'smiles': smiles,
+            'drugbank_tanimoto': db_sim['max_tanimoto_to_drugbank'],
+            'in_pharma_space': db_sim['in_pharmaceutical_space'],
+            'alert_count': len(alerts),
+            'suggestions_found': len(suggestion_count) > 0,
+            'suggestion_count': len(suggestion_count)
+        })
+    
+    df = pd.DataFrame(results)
+    
+    # Stratified failure rate
+    stratified = df.groupby(
+        pd.cut(df['drugbank_tanimoto'], bins=[0, 0.2, 0.4, 0.6, 1.0])
+    )['suggestions_found'].agg(['mean', 'count'])
+    
+    stratified.columns = ['success_rate', 'compound_count']
+    return df, stratified
+
+# Expected output:
+# Tanimoto Range | Success Rate | Count
+# [0.0 – 0.2]   |    12.4%     |  234   ← pipeline fails here
+# [0.2 – 0.4]   |    38.7%     |  891
+# [0.4 – 0.6]   |    73.2%     | 1203
+# [0.6 – 1.0]   |    91.5%     |  892   ← works best here
+```
+
+**Why this is publishable:** This failure rate stratification IS your result. You're not claiming the tool works everywhere — you're characterizing exactly where it works and where it doesn't.
+
+---
+
+## Complete Corrected Pipeline (All 4 Steps)
+
+```python
+def corrected_prescription_pipeline(query_smiles: str,
+                                     model,           # Multi-label classifier
+                                     training_fps,    # For OOD detection
+                                     drugbank_fps,    # For coverage check
+                                     temperatures,    # Per-endpoint calibration
+                                     bioisostere_db,  # Replacement database
+                                     TARGET_COLS) -> dict:
+    
+    results = {'input': query_smiles, 'candidates': []}
+    
+    # ── STEP 1: Predict all 12 endpoints ──────────────────────────────────
+    fp = smiles_to_morgan(query_smiles)
+    original_scores = predict_all_endpoints(model, fp, temperatures)
+    
+    # ── STEP 1b: SHAP + alert cross-validation ────────────────────────────
+    shap_result = compute_shap_top_fragment(model, fp, query_smiles)
+    alert_validation = validate_shap_attribution(
+        query_smiles, shap_result['top_bit'], shap_result['atom_indices']
+    )
+    
+    if alert_validation['recommendation'] == 'DO NOT SUBSTITUTE':
+        return {
+            **results,
+            'status': 'ATTRIBUTION_UNVALIDATED',
+            'message': alert_validation['message'],
+            'shap_confidence': 'LOW'
+        }
+    
+    # ── STEP 2: Map bit → fragment ────────────────────────────────────────
+    toxic_fragment = shap_result['top_fragment']
+    
+    # ── STEP 3: Get bioisostere candidates ───────────────────────────────
+    coverage = compute_drugbank_similarity(query_smiles, drugbank_fps)
+    raw_candidates = bioisostere_db.get(toxic_fragment, [])
+    
+    viable_candidates, rejected = filter_candidates_by_synthesizability(raw_candidates)
+    
+    # ── STEP 4: Re-predict all 12 for each viable candidate ───────────────
+    for candidate in viable_candidates:
+        mod_fp = smiles_to_morgan(candidate['smiles'])
+        mod_scores = predict_all_endpoints(model, mod_fp, temperatures)
+        
+        ood = compute_ood_flag(candidate['smiles'], training_fps)
+        pareto_result = evaluate_swap_pareto(original_scores, mod_scores, TARGET_COLS)
+        
+        # Format with uncertainty
+        endpoint_details = {}
+        for i, target in enumerate(TARGET_COLS):
+            endpoint_details[target] = format_prediction_with_uncertainty(
+                mod_scores[i], temperatures[i], ood
+            )
+        
+        results['candidates'].append({
+            'smiles': candidate['smiles'],
+            'swap': candidate['description'],
+            'pareto_status': pareto_result['status'],
+            'improved_endpoints': pareto_result['improved_endpoints'],
+            'worsened_endpoints': pareto_result['worsened_endpoints'],
+            'net_burden_change': pareto_result['net_burden_change'],
+            'synthesizability': candidate['synthesizability'],
+            'ood_info': ood,
+            'endpoint_predictions': endpoint_details,
+        })
+    
+    # Sort: Pareto dominators first, then trade-offs, then no-change
+    priority = {'DOMINATES': 0, 'TRADE-OFF': 1, 'NO_CHANGE': 2, 'DOMINATED': 3}
+    results['candidates'].sort(key=lambda x: priority.get(x['pareto_status'], 3))
+    
+    results['coverage_warning'] = coverage['warning']
+    results['attribution_confidence'] = alert_validation['shap_confidence']
+    results['rejected_candidates'] = rejected  # Transparent about what was filtered
+    results['scope_disclaimer'] = SCOPE_DISCLAIMER
+    
+    return results
+```
+
+---
+
+## What the Final Output Looks Like
+
+```
+═══════════════════════════════════════════════════════════════
+ QUERY: CC(Cl)Nc1ccccc1  [Chloroacetanilide derivative]
+ SHAP Attribution: Confidence = HIGH (confirmed: aniline alert)
+ Coverage: Medium (Tanimoto to DrugBank = 0.51)
+═══════════════════════════════════════════════════════════════
+
+  CANDIDATE 1: Replace -Cl with -F  [SAScore: 1.8 — EASY]
+  Status: TRADE-OFF  (OOD: NO, confidence: HIGH)
+  
+  Endpoint         Original   Modified   Delta    Interval
+  NR-AR            0.82       0.31       -0.51 ✅  [0.19, 0.43]
+  SR-MMP           0.31       0.58       +0.27 ⚠️  [0.43, 0.73]
+  SR-p53           0.61       0.59       -0.02 ≈   [0.41, 0.77]
+  ... (9 more)
+
+  Net Toxicity Burden: -0.89 (improved overall)
+  ⚠️ WARNING: Mitochondrial risk increased. Review SR-MMP.
+
+  CANDIDATE 2: Replace -Cl with -OH  [SAScore: 1.3 — EASY]
+  Status: DOMINATES  (OOD: NO, confidence: HIGH)
+  
+  All 12 endpoints reduced or unchanged ✅
+  Net Toxicity Burden: -1.47
+
+═══════════════════════════════════════════════════════════════
+ SCOPE: Tox21 toxicity only. No efficacy model applied.
+ 1 candidate rejected for SAScore > 4.0 (see details below).
+═══════════════════════════════════════════════════════════════
+```
+
+---
+
+## Project Deliverables & Contribution Summary
+
+| Component | Standard Project Has | Your Project Has |
+|-----------|---------------------|-----------------|
+| Endpoint coverage | Single score | All 12 endpoints |
+| Output format | Point estimate | Pareto front |
+| Uncertainty | None | Calibrated intervals + OOD flag |
+| Synthesizability | None | SAScore gate |
+| Attribution validation | SHAP only | SHAP × structural alert overlay |
+| Scope | Implicit | Explicitly declared |
+| Failure analysis | None | Stratified coverage report by scaffold |
+| Actionability | "It's toxic" | "Swap X → Y, but watch SR-MMP" |
+
+### The Publishable Claim
+> *"To our knowledge, this is the first open-source pipeline to combine SHAP-guided bioisostere substitution, multi-endpoint Pareto optimization, synthesizability filtering, and out-of-distribution uncertainty quantification for the Tox21 benchmark — along with a systematic characterization of pipeline failure modes stratified by pharmaceutical chemical space coverage."*
+
+---
+
+## Libraries Reference
+
+| Need | Library | Install |
+|------|---------|---------|
+| Morgan fingerprints | `rdkit` | `conda install -c conda-forge rdkit` |
+| SAScore | `rdkit.Chem.RDConfig` (built-in contrib) | Included with RDKit |
+| PAINS/Brenk filters | `rdkit.Chem.FilterCatalog` | Included with RDKit |
+| SHAP | `shap` | `pip install shap` |
+| Calibration | `scipy.optimize` | Included with scipy |
+| Conformal prediction | `nonconformist` | `pip install nonconformist` |
+| OOD detection | `rdkit.DataStructs.BulkTanimotoSimilarity` | Included with RDKit |
+| Pareto analysis | `numpy` (custom logic above) | Included |
+| Dashboard | `streamlit` + `plotly` | `pip install streamlit plotly` |

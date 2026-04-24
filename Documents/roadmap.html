@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Toxicity Classification Engine - Roadmap</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #1f2937;
+            --bg-color: #f9fafb;
+            --container-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            --important-bg: #eff6ff;
+            --important-border: #3b82f6;
+            --warning-bg: #fffbeb;
+            --warning-border: #f59e0b;
+            --caution-bg: #fef2f2;
+            --caution-border: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1, h2, h3 {
+            color: #111827;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.4em;
+        }
+
+        p, ul, li {
+            margin-bottom: 1em;
+        }
+
+        /* Callout Styles */
+        blockquote {
+            margin: 1.5em 0;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            border-left: 5px solid var(--primary-color);
+            background-color: #f3f4f6;
+        }
+
+        blockquote.important {
+            background-color: var(--important-bg);
+            border-left-color: var(--important-border);
+        }
+
+        blockquote.warning {
+            background-color: var(--warning-bg);
+            border-left-color: var(--warning-border);
+        }
+
+        blockquote.caution {
+            background-color: var(--caution-bg);
+            border-left-color: var(--caution-border);
+        }
+
+        blockquote p {
+            margin: 0;
+        }
+
+        blockquote strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Code Styles */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            margin: 1.5em 0;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Mermaid Chart Container */
+        .mermaid {
+            background: white;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin: 1.5em 0;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧪 Molecular Toxicity Classification Engine</h1>
+    <h2>Master Project Roadmap — Tox21 Challenge (Final Version)</h2>
+
+    <blockquote class="important">
+        <strong>[!IMPORTANT]</strong>
+        This is the authoritative, fully-updated roadmap. It supersedes the original 6-phase plan. All upgrades from the pipeline corrections, imbalance strategy, and literature review are integrated here.
+    </blockquote>
+
+    <hr>
+
+    <h2>What This Project Actually Is</h2>
+    <p>Not a toxicity classifier. A <strong>Prediction-to-Prescription decision-support system</strong> that:</p>
+    <ol>
+        <li>Predicts toxicity across <strong>all 12 Tox21 endpoints simultaneously</strong></li>
+        <li>Identifies <strong>which molecular fragment</strong> is responsible (SHAP × structural alert validation)</li>
+        <li>Suggests <strong>synthesizable bioisostere replacements</strong> (ChEMBL-backed, SAScore-filtered)</li>
+        <li>Re-predicts across <strong>all 12 endpoints</strong> for each candidate and outputs a <strong>Pareto front</strong></li>
+        <li>Attaches <strong>calibrated uncertainty intervals</strong> and <strong>OOD flags</strong> to every prediction</li>
+    </ol>
+    <p><strong>Closest prior art:</strong> Cyto-Safe (Feitosa et al.) — which stops at step 2. You go through step 5.<br>
+    <strong>Key literature:</strong> Zhang et al. (2025), Barua et al., Feitosa et al. (your extracted papers)</p>
+
+    <hr>
+
+    <h2>Final Research Question</h2>
+    <blockquote>
+        <p><strong>"Does the geometric cohesion of each Tox21 endpoint's toxic class (measured by intraclass Tanimoto similarity) predict where SMOTE-augmented training and SHAP attribution systematically fail — and does a SHAP-guided, structurally-validated, synthesizability-filtered bioisostere pipeline demonstrate the practical consequence of those failures by producing Pareto-dominant reductions across all 12 endpoints for high-cohesion vs. low-cohesion scaffolds?"</strong></p>
+    </blockquote>
+
+    <h3>Three Testable Claims (Reordered by Novelty)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Priority</th>
+                <th>#</th>
+                <th>Claim</th>
+                <th>How to Test</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>PRIMARY</strong></td>
+                <td>1</td>
+                <td><strong>Geometric imbalance (intraclass Tanimoto cohesion) predicts SMOTE failure and SHAP attribution reliability per endpoint</strong></td>
+                <td>Correlate cohesion ratio with AUPRC gain from SMOTE and alert overlap rate across 12 endpoints</td>
+            </tr>
+            <tr>
+                <td>Supporting</td>
+                <td>2</td>
+                <td>SHAP × alert cross-validation is the first evaluation criterion for attribution quality in molecular toxicity</td>
+                <td>Overlap rate: SHAP high-confidence vs known toxic scaffolds</td>
+            </tr>
+            <tr>
+                <td>Demonstration</td>
+                <td>3</td>
+                <td>Pareto optimization reveals risk-shifting effects single-endpoint models miss</td>
+                <td>Show NR-AR↓ while SR-MMP↑ on real compounds</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h2>Architecture (Corrected)</h2>
+    <div class="mermaid">
+flowchart TD
+    A["Input: SMILES String"] --> B["Phase 1: Environment + Data Acquisition"]
+    B --> C["Phase 2: Multi-Representation Featurization\nECFP4/ECFP6/MACCS/RDKit ablation\n→ Scaffold-stratified split"]
+    C --> D["Phase 3: Geometric Imbalance Analysis\n→ Intraclass Tanimoto cohesion per endpoint\n→ Focal Loss + per-endpoint weights\n→ SMOTE in embedding space (where valid)"]
+    D --> E["Phase 4: ToxNet Training\nShared backbone + 12 task heads\nOPTUNA hyperparameter search\nMasked Focal Loss for NaN labels"]
+    E --> F["Phase 5: Evaluation\nAUPRC primary, AUROC+F1+MCC secondary\nPer-endpoint threshold tuning (recall≥0.85)\nGeometric failure correlation"]
+    F --> G["Phase 6: Prescription Pipeline\nSHAP → Alert validation → ChEMBL bioisostere\n→ SAScore filter → Pareto re-prediction\n→ OOD + uncertainty output"]
+    G --> H["Phase 7: Dashboard\nPareto front UI + regulatory disclaimer"]
+    </div>
+
+    <hr>
+
+    <h2>Phase 1 — Environment Setup, Dataset Acquisition &amp; SMILES Validation</h2>
+
+    <h3>Environment</h3>
+<pre><code># Step 1: Conda environment (RDKit CANNOT be pip-installed)
+conda create -n tox21_env python=3.10
+conda activate tox21_env
+conda install -c conda-forge rdkit
+
+# Step 2: ML + cheminformatics stack
+pip install pandas numpy scikit-learn imbalanced-learn
+pip install xgboost lightgbm optuna          # OPTUNA for hyperparameter search
+pip install torch torchvision                 # PyTorch for ToxNet
+pip install shap matplotlib seaborn plotly
+pip install streamlit
+pip install chembl-webresource-client         # ChEMBL API (ONE-TIME cache building)
+pip install mapie                             # Conformal prediction (replaces nonconformist)</code></pre>
+
+    <h3>SMILES Validation Gate — Run First, Always</h3>
+    <blockquote class="warning">
+        <strong>[!WARNING]</strong>
+        Every downstream function assumes valid SMILES. <code>Chem.MolFromSmiles()</code> returns <code>None</code> silently for invalid inputs, which propagates as <code>IndexError</code> or <code>NaN</code> loss hours into training. Run this once at ingestion and index everything downstream off the validated list.
+    </blockquote>
+
+<pre><code>from rdkit import Chem
+import pandas as pd
+
+def validate_smiles(smiles_list: list) -> tuple:
+    valid_indices, invalid_records = [], []
+    for i, smi in enumerate(smiles_list):
+        mol = Chem.MolFromSmiles(smi)
+        if mol is not None:
+            valid_indices.append(i)
+        else:
+            invalid_records.append((i, smi))
+    if invalid_records:
+        print(f"WARNING: {len(invalid_records)} invalid SMILES dropped:")
+        for idx, smi in invalid_records[:5]:
+            print(f"  Row {idx}: '{smi[:50]}'")
+    print(f"✅ {len(valid_indices)}/{len(smiles_list)} valid SMILES")
+    return valid_indices, invalid_records
+
+# Call this ONCE after loading:
+df = pd.read_csv('tox21.csv')
+valid_idx, _ = validate_smiles(df['smiles'].tolist())
+df = df.iloc[valid_idx].reset_index(drop=True)</code></pre>
+
+    <h3>Dataset Sources</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Source</th>
+                <th>URL</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Official Tox21</td>
+                <td>https://tripod.nih.gov/tox21/challenge/</td>
+                <td>Ground truth</td>
+            </tr>
+            <tr>
+                <td>DeepChem Loader</td>
+                <td><code>dc.molnet.load_tox21()</code></td>
+                <td>Auto scaffold split</td>
+            </tr>
+            <tr>
+                <td>OCHEM</td>
+                <td>https://ochem.eu/alerts/list.do</td>
+                <td>Structural alert SMARTS</td>
+            </tr>
+            <tr>
+                <td>ChEMBL</td>
+                <td>https://www.ebi.ac.uk/chembl/</td>
+                <td>Bioisostere validation</td>
+            </tr>
+            <tr>
+                <td>DrugBank</td>
+                <td>https://go.drugbank.com/</td>
+                <td>Pharmaceutical space check</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Dataset Facts</h3>
+    <ul>
+        <li><strong>7,831 compounds</strong>, <strong>12 binary toxicity endpoints</strong></li>
+        <li><strong>NaN prevalence:</strong> 15–25% per endpoint (use -1 sentinel, mask during loss)</li>
+        <li><strong>Toxic prevalence:</strong> 2.8% (NR-AR-LBD) → 16.9% (SR-MMP) — severe, endpoint-variable imbalance</li>
+    </ul>
+
+    <hr>
+
+    <h2>Phase 2 — Multi-Representation Featurization + Scaffold Split</h2>
+
+    <h3>Why This Phase is Novel</h3>
+    <p>Instead of assuming Morgan fingerprints (as every other project does), you run an <strong>ablation study</strong> across 5 representations. Zhang et al. (2025) Table 2 documents these theoretically — you are the first to compare them empirically on Tox21 using AUPRC as the primary metric and SHAP compatibility as an evaluation criterion.</p>
+
+    <h3>Morgan Fingerprints WITH bitInfo Capture</h3>
+    <blockquote class="warning">
+        <strong>[!WARNING]</strong>
+        Passing <code>bitInfo={}</code> inside the function call creates a temporary dict that gets garbage collected immediately. This causes SHAP-to-atom mapping in Phase 6 to fail silently. Declare the dict OUTSIDE the function call.
+    </blockquote>
+
+<pre><code>from rdkit import Chem
+from rdkit.Chem import AllChem
+import numpy as np
+
+def smiles_to_morgan_with_info(smiles: str, radius: int = 2, n_bits: int = 2048) -> tuple:
+    """Returns (fingerprint_array, bit_info_dict)."""
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return None, None
+    
+    bit_info = {}  # ✔ Declared OUTSIDE
+    fp = AllChem.GetMorganFingerprintAsBitVect(
+        mol, radius=radius, nBits=n_bits, bitInfo=bit_info
+    )
+    return np.array(fp), bit_info
+
+def smiles_to_morgan(smiles: str, radius: int = 2, n_bits: int = 2048) -> np.ndarray:
+    """Fingerprint only, no bit info (for fast training loops)."""
+    fp_array, _ = smiles_to_morgan_with_info(smiles, radius, n_bits)
+    return fp_array</code></pre>
+
+    <h3>The Descriptor Scaling Trap (Critical Data Science Error)</h3>
+    <blockquote class="caution">
+        <strong>[!CAUTION]</strong>
+        If you use the <code>ECFP4+Desc</code> representation, you are concatenating binary arrays <code>[0, 1]</code> with continuous descriptors like Molecular Weight <code>[18.0, 800.0]</code>. If you feed unscaled combinations into PCA (Phase 3) or ToxNet (Phase 4), the large-magnitude variables will completely destroy the gradients and PCA variance calculations. You MUST scale continuous descriptors.
+    </blockquote>
+
+<pre><code>from sklearn.preprocessing import StandardScaler
+
+# Correct workflow for combined features:
+# 1. Split train/val/test first
+# 2. Extract fingerprints (binary) and descriptors (continuous)
+# 3. Fit StandardScaler on TRAIN descriptors ONLY
+# 4. Transform train, val, test descriptors
+# 5. Concatenate binary_fp + scaled_desc</code></pre>
+
+    <h3>Scaffold Splitting (Mandatory — Not Optional)</h3>
+    <blockquote class="warning">
+        <strong>[!WARNING]</strong>
+        Random splitting on molecular data causes structural leakage — similar scaffolds appear in both train and test, inflating AUC falsely. Use Murcko scaffold split. Zhang et al. (2025) and Barua et al. both use scaffold splits for honest evaluation.
+    </blockquote>
+
+<pre><code>from rdkit.Chem.Scaffolds import MurckoScaffold
+from collections import defaultdict
+
+def scaffold_stratified_split(smiles_list, labels, test_size=0.2, val_size=0.1):
+    scaffold_to_idx = defaultdict(list)
+    for i, smi in enumerate(smiles_list):
+        mol = Chem.MolFromSmiles(smi)
+        if mol:
+            scaffold = MurckoScaffold.MurckoScaffoldSmiles(mol=mol)
+            scaffold_to_idx[scaffold].append(i)
+    
+    scaffolds = list(scaffold_to_idx.keys())
+    np.random.shuffle(scaffolds)
+    
+    n_test = int(len(smiles_list) * test_size)
+    n_val = int(len(smiles_list) * val_size)
+    test_idx, val_idx, train_idx = [], [], []
+    
+    for scaffold in scaffolds:
+        indices = scaffold_to_idx[scaffold]
+        if len(test_idx) < n_test: test_idx.extend(indices)
+        elif len(val_idx) < n_val:  val_idx.extend(indices)
+        else:                        train_idx.extend(indices)
+    
+    return np.array(train_idx), np.array(val_idx), np.array(test_idx)</code></pre>
+
+    <hr>
+
+    <h2>Phase 3 — Geometric Imbalance Analysis + Focal Loss Training</h2>
+
+    <h3>Step 3A — Geometric Imbalance (Novel Research Finding)</h3>
+    <p>Before applying any resampling, measure whether the toxic class is geometrically clustered. This predicts where SMOTE is valid and where it isn't — a finding no prior Tox21 paper has quantified.</p>
+
+<pre><code>from rdkit import DataStructs
+
+def compute_intraclass_cohesion(smiles_list, labels, target_name, sample_size=200):
+    fps = [AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(s), 2, 2048)
+           for s in smiles_list if Chem.MolFromSmiles(s)]
+    
+    toxic_idx   = np.where(labels == 1)[0]
+    nontoxic_idx = np.where(labels == 0)[0]
+    
+    def mean_pairwise(idx):
+        if len(idx) > sample_size:
+            idx = np.random.choice(idx, sample_size, replace=False)
+        fps_sub = [fps[i] for i in idx]
+        sims = [DataStructs.TanimotoSimilarity(fps_sub[i], fps_sub[j])
+                for i in range(len(fps_sub)) for j in range(i+1, len(fps_sub))]
+        return np.mean(sims) if sims else 0.0
+    
+    toxic_coh    = mean_pairwise(toxic_idx)
+    nontoxic_coh = mean_pairwise(nontoxic_idx)
+    ratio        = toxic_coh / max(nontoxic_coh, 1e-6)
+    
+    return {
+        'endpoint': target_name,
+        'toxic_cohesion': round(toxic_coh, 4),
+        'nontoxic_cohesion': round(nontoxic_coh, 4),
+        'cohesion_ratio': round(ratio, 2),
+        'smote_valid': ratio < 1.5,   # SMOTE valid only if NOT highly clustered
+    }
+
+# Run for all 12 endpoints — this table IS a research result</code></pre>
+
+    <h3>Step 3B — Focal Loss (Primary Loss Function)</h3>
+    <blockquote class="important">
+        <strong>[!IMPORTANT]</strong>
+        Do NOT use standard BCE or <code>class_weight='balanced'</code> as primary. Focal Loss (γ=2) with per-endpoint alpha weights is the correct approach. Barua et al. validate SMOTE + hyperparameter optimization as the field-standard combination — Focal Loss is the stronger alternative to SMOTE for severely imbalanced endpoints.
+    </blockquote>
+
+<pre><code>import torch
+import torch.nn.functional as F
+
+class PerEndpointFocalLoss(torch.nn.Module):
+    def __init__(self, pos_weights: dict, target_names: list, gamma: float = 2.0):
+        super().__init__()
+        self.gamma = gamma
+        raw = torch.tensor([pos_weights[t] for t in target_names])
+        self.alpha = (raw / (raw + 1)).unsqueeze(0)  # Per-endpoint alpha: (1, 12)
+    
+    def forward(self, logits, targets):
+        # targets: -1 for unknown labels → mask those out
+        mask           = (targets != -1).float()
+        targets_clean  = targets.clone().float()
+        targets_clean[targets == -1] = 0.0
+        
+        alpha = self.alpha.to(logits.device).expand_as(logits)
+        probs = torch.sigmoid(logits)
+        p_t   = probs * targets_clean + (1 - probs) * (1 - targets_clean)
+        alpha_t = alpha * targets_clean + (1 - alpha) * (1 - targets_clean)
+        
+        bce   = F.binary_cross_entropy_with_logits(logits, targets_clean, reduction='none')
+        focal = alpha_t * (1 - p_t) ** self.gamma * bce
+        
+        masked = focal * mask
+        return masked.sum() / mask.sum().clamp(min=1)</code></pre>
+
+    <h3>Step 3C — SMOTE in Embedding Space (Only Where Valid)</h3>
+
+<pre><code># Only for endpoints where geometric_analysis['smote_valid'] == True
+from imblearn.over_sampling import ADASYN
+from imblearn.under_sampling import TomekLinks
+
+def resample_if_valid(embeddings, y_endpoint, smote_valid):
+    if not smote_valid:
+        return embeddings, y_endpoint    # Don't SMOTE geometric clusters
+    
+    adasyn = ADASYN(random_state=42, n_neighbors=5)
+    X_res, y_res = adasyn.fit_resample(embeddings, y_endpoint)
+    
+    tomek = TomekLinks()
+    X_clean, y_clean = tomek.fit_resample(X_res, y_res)
+    return X_clean, y_clean</code></pre>
+
+    <hr>
+
+    <h2>Phase 4 — ToxNet Training with OPTUNA</h2>
+
+    <h3>Architecture: Shared Backbone + Per-Endpoint Heads</h3>
+
+<pre><code>import torch.nn as nn
+
+class ToxNet(nn.Module):
+    def __init__(self, input_dim=2048, shared_dims=[1024,512,256], head_dim=64, n_tasks=12):
+        super().__init__()
+        layers, prev = [], input_dim
+        for h in shared_dims:
+            layers += [nn.Linear(prev,h), nn.BatchNorm1d(h), nn.GELU(), nn.Dropout(0.3)]
+            prev = h
+        self.backbone = nn.Sequential(*layers)
+        
+        # 12 independent heads — one per Tox21 endpoint
+        self.heads = nn.ModuleList([
+            nn.Sequential(nn.Linear(prev,head_dim), nn.ReLU(), nn.Dropout(0.15), nn.Linear(head_dim,1))
+            for _ in range(n_tasks)
+        ])
+    
+    def forward(self, x):
+        shared = self.backbone(x)
+        return torch.cat([h(shared) for h in self.heads], dim=1)
+    
+    def get_embeddings(self, x):
+        return self.backbone(x)</code></pre>
+
+    <h3>OPTUNA Hyperparameter Search (Corrected for Neural Networks)</h3>
+    <blockquote class="caution">
+        <strong>[!CAUTION]</strong>
+        The previous version of this roadmap suggested tuning <code>n_estimators</code>, <code>max_depth</code>, and <code>colsample_bytree</code>. Those are tree-based hyperparameters (XGBoost/Random Forest). We are training <strong>ToxNet</strong>, which is a PyTorch Neural Network. Attempting to pass tree parameters to PyTorch is a fatal ML architecture error. Tune neural parameters instead.
+    </blockquote>
+
+<pre><code>import optuna
+
+def objective(trial):
+    params = {
+        'learning_rate': trial.suggest_float('lr', 1e-4, 1e-2, log=True),
+        'dropout':       trial.suggest_float('dropout', 0.1, 0.5),
+        'batch_size':    trial.suggest_categorical('batch_size', [32, 64, 128]),
+        'focal_gamma':   trial.suggest_float('gamma', 1.0, 5.0),
+        'shared_dims':   trial.suggest_categorical('dims', [
+                             [1024, 512, 256], 
+                             [512, 256, 128]
+                         ]),
+        'weight_decay':  trial.suggest_float('weight_decay', 1e-6, 1e-3, log=True)
+    }
+    
+    # Train ToxNet with these params and evaluate on macro AUPRC
+    score = cross_val_auprc_toxnet(params, X_train, Y_train)
+    return score  # Maximize AUPRC
+
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=50)</code></pre>
+
+    <hr>
+
+    <h2>Phase 5 — Evaluation Suite</h2>
+
+    <h3>Primary Metric: AUPRC (Not AUROC, Never Accuracy)</h3>
+    <blockquote class="caution">
+        <strong>[!CAUTION]</strong>
+        The original roadmap listed ROC-AUC as the primary metric. This is wrong for severe imbalance. AUPRC is more informative when the minority class is < 10%. A random classifier gets AUPRC = prevalence (e.g., 0.05 for NR-AR-LBD). Every result must be reported with AUPRC Lift = AUPRC / prevalence to show improvement over random.
+    </blockquote>
+
+<pre><code>from sklearn.metrics import roc_auc_score, average_precision_score, f1_score, matthews_corrcoef
+
+def evaluate_all_endpoints(Y_true, Y_proba, Y_pred, TARGET_COLS):
+    results = []
+    for i, target in enumerate(TARGET_COLS):
+        mask = Y_true[:, i] != -1
+        y_t, y_p, y_d = Y_true[mask, i], Y_proba[mask, i], Y_pred[mask, i]
+        
+        prev   = y_t.mean()
+        auprc  = average_precision_score(y_t, y_p)
+        auroc  = roc_auc_score(y_t, y_p)
+        f1     = f1_score(y_t, y_d, zero_division=0)
+        mcc    = matthews_corrcoef(y_t, y_d)
+        
+        results.append({
+            'Endpoint': target,
+            'Prevalence': f"{prev:.1%}",
+            'AUPRC': round(auprc, 4),           # ← PRIMARY
+            'AUPRC_Lift': f"{auprc/prev:.1f}x", # vs random
+            'AUROC': round(auroc, 4),
+            'F1': round(f1, 4),
+            'MCC': round(mcc, 4),
+        })
+    return pd.DataFrame(results)</code></pre>
+
+    <h3>Per-Endpoint Threshold Tuning (Recall Floor = 0.85)</h3>
+
+<pre><code>from sklearn.metrics import precision_recall_curve
+
+def tune_threshold(y_true, y_prob, recall_floor=0.85):
+    precs, recs, thresholds = precision_recall_curve(y_true, y_prob)
+    thresholds = np.append(thresholds, 1.0)
+    valid = recs >= recall_floor
+    best_idx = np.argmax(precs * valid) if valid.any() else np.argmax(recs)
+    return {
+        'threshold': round(thresholds[best_idx], 4),
+        'recall':    round(recs[best_idx], 4),
+        'precision': round(precs[best_idx], 4),
+    }</code></pre>
+
+    <h3>Benchmark Targets</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Stage</th>
+                <th style="text-align: center;">Expected Macro AUPRC</th>
+                <th style="text-align: center;">Expected Macro AUROC</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Logistic Regression (baseline)</td>
+                <td style="text-align: center;">0.20–0.28</td>
+                <td style="text-align: center;">0.72–0.76</td>
+            </tr>
+            <tr>
+                <td>XGBoost + ECFP4</td>
+                <td style="text-align: center;">0.35–0.45</td>
+                <td style="text-align: center;">0.82–0.86</td>
+            </tr>
+            <tr>
+                <td>ToxNet + Focal Loss + OPTUNA</td>
+                <td style="text-align: center;">0.42–0.52</td>
+                <td style="text-align: center;">0.84–0.88</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><em>Note: AUPRC is lower than AUROC numerically — that's expected and correct. It's harder to achieve. A model that looks great on AUROC but collapses on AUPRC is gaming the majority class.</em></p>
+
+    <hr>
+
+    <h2>Phase 6 — Prescription Pipeline</h2>
+
+    <h3>Phase 6 — Note on ChEMBL API</h3>
+    <blockquote class="warning">
+        <strong>[!WARNING]</strong>
+        The prescription pipeline previously queried ChEMBL live in the Streamlit dashboard. ChEMBL enforces rate limiting and common fragments return hundreds of results. This causes the dashboard to hang or crash. The correct approach is a <strong>one-time cache build</strong> run as an offline script, saved as a local database or pickle, and queried locally at runtime.
+    </blockquote>
+
+<pre><code># OFFLINE SCRIPT (run once, not in dashboard):
+# build_chembl_cache.py
+
+from chembl_webresource_client.new_client import new_client
+import pickle
+
+FRAGMENT_QUERIES = [
+    'Nc1ccccc1',     # Aniline
+    '[NX3](=O)=O',   # Nitro
+    'c1ccc(F)cc1',   # Fluorobenzene
+    'c1ccc(O)cc1',   # Phenol
+]
+
+cache = {}
+for frag in FRAGMENT_QUERIES:
+    molecule = new_client.molecule
+    results = molecule.filter(
+        molecule_structures__canonical_smiles__contains=frag
+    ).only(['molecule_chembl_id', 'molecule_structures', 'molecule_properties'])
+    cache[frag] = [
+        {'chembl_id': r['molecule_chembl_id'],
+         'smiles':    r['molecule_structures']['canonical_smiles'],
+         'mw':        r.get('molecule_properties', {}).get('full_mwt'),
+         'logp':      r.get('molecule_properties', {}).get('alogp')}
+        for r in results[:50]  # Cap per fragment
+    ]
+
+with open('chembl_cache.pkl', 'wb') as f:
+    pickle.dump(cache, f)
+
+# IN DASHBOARD (fast, no API call):
+# with open('chembl_cache.pkl', 'rb') as f:
+#     CHEMBL_CACHE = pickle.load(f)</code></pre>
+
+    <h3>The 4-Step Corrected Flow</h3>
+<pre><code>Step 1: Predict all 12 endpoints → SHAP per endpoint
+Step 1b: Cross-validate SHAP against Brenk + PAINS + OCHEM alerts
+         → Flag low-confidence attributions (Zhang et al. open problem)
+         → Only proceed if alert overlap confirmed
+
+Step 2: Map top SHAP bit → molecular fragment (RDKit atom-info)
+
+Step 3: Query ChEMBL API for compounds containing replacement fragment
+         → Filter A (Synthesizability): SAScore < 4.0
+         → Filter B (Pharmacokinetics): |ΔLogP| < 0.5 and |ΔMW| < 25 Da 
+           (Prevents bioisosteres that destroy drug absorption/efficacy)
+         → Flag: Tanimoto to DrugBank < 0.4 (out-of-pharma-space warning)
+
+Step 4: Re-predict all 12 endpoints for each viable candidate
+         → Temperature-scaled calibrated probabilities
+         → Apply "Intended Mechanism" override (ignore flags if target is intentional)
+         → OOD detection via Tanimoto to training set
+         → Pareto dominance classification
+         → Output: sorted Pareto front with ADME metrics and uncertainty intervals</code></pre>
+
+    <h3>Cyto-Safe Differentiation (One Sentence)</h3>
+    <blockquote>
+        <p>"Where Cyto-Safe terminates at visualizing the molecular fragment responsible for toxicity, our pipeline extends to suggesting validated, synthesizable replacements and re-predicting safety across all 12 Tox21 endpoints simultaneously — transforming toxicity prediction from a classification endpoint into a structural optimization decision-support system." <em>(Feitosa et al., Zhang et al. 2025)</em></p>
+    </blockquote>
+
+    <hr>
+
+    <h2>Phase 7 — Dashboard</h2>
+
+    <h3>What the UI Shows (Updated)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Panel</th>
+                <th>Content</th>
+                <th>Technical Source</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Molecule viewer</td>
+                <td>2D structure + flagged atoms</td>
+                <td>RDKit Draw + SHAP atoms</td>
+            </tr>
+            <tr>
+                <td>Therapeutic Override</td>
+                <td>Dropdown to ignore specific endpoints</td>
+                <td>User Input (Biological fix)</td>
+            </tr>
+            <tr>
+                <td>Radar chart</td>
+                <td>12-endpoint toxicity profile</td>
+                <td>Plotly radar</td>
+            </tr>
+            <tr>
+                <td>Prescription table</td>
+                <td>Ranked Pareto candidates</td>
+                <td>Pipeline step 4</td>
+            </tr>
+            <tr>
+                <td>ADME Preservation</td>
+                <td>ΔLogP, ΔMolecular Weight</td>
+                <td>RDKit Descriptors</td>
+            </tr>
+            <tr>
+                <td>Endpoint delta grid</td>
+                <td>Per-endpoint before/after</td>
+                <td>Pareto evaluation</td>
+            </tr>
+            <tr>
+                <td>Uncertainty bands</td>
+                <td>[lower, upper] per endpoint</td>
+                <td>Temperature scaling + OOD</td>
+            </tr>
+            <tr>
+                <td>SHAP confidence</td>
+                <td>HIGH/MEDIUM/LOW + alert name</td>
+                <td>Alert cross-validation</td>
+            </tr>
+            <tr>
+                <td>Coverage warning</td>
+                <td>Pharma-space proximity</td>
+                <td>DrugBank Tanimoto</td>
+            </tr>
+            <tr>
+                <td>Scope disclaimer</td>
+                <td>In-vitro vs In-vivo metabolite warning</td>
+                <td>Hardcoded regulatory text</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h2>Complete File Structure (Updated)</h2>
+<pre><code>tox21_project/
+├── data/
+│   ├── tox21.csv                    # Raw dataset
+│   ├── drugbank_fps.pkl             # DrugBank fingerprints (coverage check)
+│   └── ochem_alerts.json            # Structural alert SMARTS from OCHEM
+│
+├── notebooks/
+│   ├── 01_EDA.ipynb                 # Class balance, scaffold distribution
+│   ├── 02_Geometric_Imbalance.ipynb # Intraclass Tanimoto cohesion analysis ← Novel
+│   ├── 03_Featurization_Ablation.ipynb  # ECFP4 vs MACCS vs RDKit comparison
+│   ├── 04_Training.ipynb            # ToxNet + Focal Loss + OPTUNA
+│   ├── 05_Evaluation.ipynb          # AUPRC / AUROC / MCC / threshold tuning
+│   └── 06_Prescription.ipynb        # Full pipeline end-to-end demo
+│
+├── src/
+│   ├── featurize.py                 # All 5 fingerprint representations
+│   ├── scaffold_split.py            # Murcko scaffold stratified split
+│   ├── geometric_imbalance.py       # Intraclass cohesion analysis
+│   ├── focal_loss.py                # PerEndpointFocalLoss
+│   ├── model.py                     # ToxNet architecture
+│   ├── train.py                     # Training loop + OPTUNA
+│   ├── evaluate.py                  # Full metric suite
+│   ├── shap_validator.py            # SHAP × alert cross-validation
+│   ├── bioisostere.py               # ChEMBL query + SAScore filter
+│   ├── pareto.py                    # Pareto dominance evaluation
+│   ├── uncertainty.py               # Temperature scaling + OOD detection
+│   └── prescription_pipeline.py     # Full corrected 4-step pipeline
+│
+├── models/
+│   ├── toxnet_final.pt              # Trained ToxNet weights
+│   └── temperatures.pkl             # Per-endpoint calibration temperatures
+│
+├── app.py                           # Streamlit dashboard
+├── environment.yml
+└── requirements.txt</code></pre>
+
+    <hr>
+
+    <h2>Environment File</h2>
+<pre><code>name: tox21_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - rdkit
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - pip
+  - pip:
+    - imbalanced-learn
+    - xgboost
+    - lightgbm
+    - optuna                          # Hyperparameter search
+    - shap
+    - torch
+    - torchvision
+    - skorch                          # Scikit-learn wrapper for PyTorch (Required for MAPIE)
+    - streamlit
+    - plotly
+    - chembl-webresource-client       # Bioisostere cache building (one-time)
+    - mapie                           # Conformal prediction (replaces nonconformist)
+    - deepchem                        # Optional: scaffold loader</code></pre>
+
+    <hr>
+
+    <h2>Key Academic References (Updated)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Paper</th>
+                <th>Where Used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Zhang et al. (2025). <em>AI-Driven Drug Toxicity Prediction.</em> Toxics.</td>
+                <td>Representation table, SHAP open problem, regulatory framing</td>
+            </tr>
+            <tr>
+                <td>Feitosa et al. <em>Cyto-Safe.</em></td>
+                <td>Primary prior art — differentiation argument</td>
+            </tr>
+            <tr>
+                <td>Barua et al. <em>Organ Toxicity ML.</em></td>
+                <td>SMOTE+OPTUNA validation, benchmark AUC values</td>
+            </tr>
+            <tr>
+                <td>Rogers &amp; Hahn (2010). <em>ECFP.</em> JCIM.</td>
+                <td>Morgan fingerprint justification</td>
+            </tr>
+            <tr>
+                <td>Lundberg &amp; Lee (2017). <em>SHAP.</em> NeurIPS.</td>
+                <td>Explainability method</td>
+            </tr>
+            <tr>
+                <td>Jiang et al. (2021). <em>GNNs vs fingerprints.</em></td>
+                <td>Justification for ECFP over GNN</td>
+            </tr>
+            <tr>
+                <td>Lin et al. (2017). <em>Focal Loss.</em> ICCV.</td>
+                <td>Focal Loss theoretical basis</td>
+            </tr>
+            <tr>
+                <td>Wu et al. (2018). <em>MoleculeNet.</em> Chemical Science.</td>
+                <td>Dataset + benchmark metrics</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h2>Revised Timeline</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Phase</th>
+                <th>Duration</th>
+                <th>Key Deliverable</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Phase 1: Environment + Data</td>
+                <td>Day 1–2</td>
+                <td>Conda env, Tox21 loaded, OCHEM alerts</td>
+                <td>⬜</td>
+            </tr>
+            <tr>
+                <td>Phase 2: Featurization Ablation</td>
+                <td>Day 3–4</td>
+                <td>5-representation comparison table (AUPRC)</td>
+                <td>⬜</td>
+            </tr>
+            <tr>
+                <td>Phase 3: Geometric Imbalance</td>
+                <td>Day 5</td>
+                <td>Per-endpoint cohesion table + SMOTE validity map</td>
+                <td>⬜</td>
+            </tr>
+            <tr>
+                <td>Phase 4: Training</td>
+                <td>Day 6–9</td>
+                <td>ToxNet + OPTUNA on best representation</td>
+                <td>⬜</td>
+            </tr>
+            <tr>
+                <td>Phase 5: Evaluation</td>
+                <td>Day 10–11</td>
+                <td>AUPRC/AUROC/MCC table, threshold calibration</td>
+                <td>⬜</td>
+            </tr>
+            <tr>
+                <td>Phase 6: Prescription Pipeline</td>
+                <td>Day 12–13</td>
+                <td>End-to-end: SMILES → Pareto front output</td>
+                <td>⬜</td>
+            </tr>
+            <tr>
+                <td>Phase 7: Dashboard</td>
+                <td>Day 14–16</td>
+                <td>Streamlit app + all panels</td>
+                <td>⬜</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>

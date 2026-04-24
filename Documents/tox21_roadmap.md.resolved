@@ -23,14 +23,14 @@ Not a toxicity classifier. A **Prediction-to-Prescription decision-support syste
 
 ## Final Research Question
 
-> **"Does SHAP-guided, structurally-validated, synthesizability-filtered bioisostere substitution produce consistent Pareto-dominant reductions across all 12 Tox21 toxicity endpoints for flagged compounds — and does the geometric cohesion of each endpoint's toxic class predict where SMOTE-augmented training and SHAP attribution systematically fail?"**
+> **"Does the geometric cohesion of each Tox21 endpoint's toxic class (measured by intraclass Tanimoto similarity) predict where SMOTE-augmented training and SHAP attribution systematically fail — and does a SHAP-guided, structurally-validated, synthesizability-filtered bioisostere pipeline demonstrate the practical consequence of those failures by producing Pareto-dominant reductions across all 12 endpoints for high-cohesion vs. low-cohesion scaffolds?"**
 
-### Three Testable Claims
-| # | Claim | How to Test |
-|---|-------|-------------|
-| 1 | SHAP × alert cross-validation is the first evaluation criterion for attribution quality in molecular toxicity | Overlap rate: SHAP high-confidence vs known toxic scaffolds |
-| 2 | Pareto optimization reveals risk-shifting effects single-endpoint models miss | Show NR-AR↓ while SR-MMP↑ on real compounds |
-| 3 | Geometric imbalance (intraclass Tanimoto cohesion) predicts SMOTE failure and SHAP attribution reliability | Correlate cohesion ratio with AUPRC gain from SMOTE across 12 endpoints |
+### Three Testable Claims (Reordered by Novelty)
+| Priority | # | Claim | How to Test |
+|----------|---|-------|-------------|
+| **PRIMARY** | 1 | **Geometric imbalance (intraclass Tanimoto cohesion) predicts SMOTE failure and SHAP attribution reliability per endpoint** | Correlate cohesion ratio with AUPRC gain from SMOTE and alert overlap rate across 12 endpoints |
+| Supporting | 2 | SHAP × alert cross-validation is the first evaluation criterion for attribution quality in molecular toxicity | Overlap rate: SHAP high-confidence vs known toxic scaffolds |
+| Demonstration | 3 | Pareto optimization reveals risk-shifting effects single-endpoint models miss | Show NR-AR↓ while SR-MMP↑ on real compounds |
 
 ---
 
@@ -49,7 +49,7 @@ flowchart TD
 
 ---
 
-## Phase 1 — Environment Setup & Dataset Acquisition
+## Phase 1 — Environment Setup, Dataset Acquisition & SMILES Validation
 
 ### Environment
 
@@ -65,8 +65,38 @@ pip install xgboost lightgbm optuna          # OPTUNA for hyperparameter search
 pip install torch torchvision                 # PyTorch for ToxNet
 pip install shap matplotlib seaborn plotly
 pip install streamlit
-pip install chembl-webresource-client         # ChEMBL API (bioisostere validation)
-pip install nonconformist                     # Conformal prediction
+pip install chembl-webresource-client         # ChEMBL API (ONE-TIME cache building)
+pip install mapie                             # Conformal prediction (replaces nonconformist)
+```
+
+### SMILES Validation Gate — Run First, Always
+
+> [!WARNING]
+> Every downstream function assumes valid SMILES. `Chem.MolFromSmiles()` returns `None` silently for invalid inputs, which propagates as `IndexError` or `NaN` loss hours into training. Run this once at ingestion and index everything downstream off the validated list.
+
+```python
+from rdkit import Chem
+import pandas as pd
+
+def validate_smiles(smiles_list: list) -> tuple:
+    valid_indices, invalid_records = [], []
+    for i, smi in enumerate(smiles_list):
+        mol = Chem.MolFromSmiles(smi)
+        if mol is not None:
+            valid_indices.append(i)
+        else:
+            invalid_records.append((i, smi))
+    if invalid_records:
+        print(f"WARNING: {len(invalid_records)} invalid SMILES dropped:")
+        for idx, smi in invalid_records[:5]:
+            print(f"  Row {idx}: '{smi[:50]}'")
+    print(f"✅ {len(valid_indices)}/{len(smiles_list)} valid SMILES")
+    return valid_indices, invalid_records
+
+# Call this ONCE after loading:
+df = pd.read_csv('tox21.csv')
+valid_idx, _ = validate_smiles(df['smiles'].tolist())
+df = df.iloc[valid_idx].reset_index(drop=True)
 ```
 
 ### Dataset Sources
@@ -91,24 +121,48 @@ pip install nonconformist                     # Conformal prediction
 ### Why This Phase is Novel
 Instead of assuming Morgan fingerprints (as every other project does), you run an **ablation study** across 5 representations. Zhang et al. (2025) Table 2 documents these theoretically — you are the first to compare them empirically on Tox21 using AUPRC as the primary metric and SHAP compatibility as an evaluation criterion.
 
+### Morgan Fingerprints WITH bitInfo Capture
+
+> [!WARNING]
+> Passing `bitInfo={}` inside the function call creates a temporary dict that gets garbage collected immediately. This causes SHAP-to-atom mapping in Phase 6 to fail silently. Declare the dict OUTSIDE the function call.
+
 ```python
 from rdkit import Chem
-from rdkit.Chem import AllChem, MACCSkeys, RDKFingerprint, Descriptors
+from rdkit.Chem import AllChem
 import numpy as np
 
-REPRESENTATIONS = {
-    'ECFP4_2048': lambda s: morgan(s, radius=2, n_bits=2048),   # Primary choice
-    'ECFP6_2048': lambda s: morgan(s, radius=3, n_bits=2048),
-    'MACCS':      lambda s: maccs(s),                            # 166 bits
-    'RDKit_FP':   lambda s: rdkit_fp(s),
-    'ECFP4+Desc': lambda s: concat(morgan(s), descriptors(s)),   # Richest
-}
-
-def morgan(smiles, radius=2, n_bits=2048):
+def smiles_to_morgan_with_info(smiles: str, radius: int = 2, n_bits: int = 2048) -> tuple:
+    """Returns (fingerprint_array, bit_info_dict)."""
     mol = Chem.MolFromSmiles(smiles)
-    if mol is None: return None
-    fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits=n_bits, bitInfo={})
-    return np.array(fp)
+    if mol is None:
+        return None, None
+    
+    bit_info = {}  # ✔ Declared OUTSIDE
+    fp = AllChem.GetMorganFingerprintAsBitVect(
+        mol, radius=radius, nBits=n_bits, bitInfo=bit_info
+    )
+    return np.array(fp), bit_info
+
+def smiles_to_morgan(smiles: str, radius: int = 2, n_bits: int = 2048) -> np.ndarray:
+    """Fingerprint only, no bit info (for fast training loops)."""
+    fp_array, _ = smiles_to_morgan_with_info(smiles, radius, n_bits)
+    return fp_array
+```
+
+### The Descriptor Scaling Trap (Critical Data Science Error)
+
+> [!CAUTION]
+> If you use the `ECFP4+Desc` representation, you are concatenating binary arrays `[0, 1]` with continuous descriptors like Molecular Weight `[18.0, 800.0]`. If you feed unscaled combinations into PCA (Phase 3) or ToxNet (Phase 4), the large-magnitude variables will completely destroy the gradients and PCA variance calculations. You MUST scale continuous descriptors.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+# Correct workflow for combined features:
+# 1. Split train/val/test first
+# 2. Extract fingerprints (binary) and descriptors (continuous)
+# 3. Fit StandardScaler on TRAIN descriptors ONLY
+# 4. Transform train, val, test descriptors
+# 5. Concatenate binary_fp + scaled_desc
 ```
 
 ### Scaffold Splitting (Mandatory — Not Optional)
@@ -270,26 +324,33 @@ class ToxNet(nn.Module):
         return self.backbone(x)
 ```
 
-### OPTUNA Hyperparameter Search (Following Barua et al.)
+### OPTUNA Hyperparameter Search (Corrected for Neural Networks)
+
+> [!CAUTION]
+> The previous version of this roadmap suggested tuning `n_estimators`, `max_depth`, and `colsample_bytree`. Those are tree-based hyperparameters (XGBoost/Random Forest). We are training **ToxNet**, which is a PyTorch Neural Network. Attempting to pass tree parameters to PyTorch is a fatal ML architecture error. Tune neural parameters instead.
 
 ```python
 import optuna
 
 def objective(trial):
     params = {
-        'n_estimators':     trial.suggest_int('n_estimators', 100, 1000),
-        'max_depth':        trial.suggest_int('max_depth', 3, 12),
-        'learning_rate':    trial.suggest_float('lr', 0.01, 0.3),
-        'focal_gamma':      trial.suggest_float('gamma', 1.0, 5.0),
-        'subsample':        trial.suggest_float('subsample', 0.6, 1.0),
-        'colsample_bytree': trial.suggest_float('colsample', 0.6, 1.0),
+        'learning_rate': trial.suggest_float('lr', 1e-4, 1e-2, log=True),
+        'dropout':       trial.suggest_float('dropout', 0.1, 0.5),
+        'batch_size':    trial.suggest_categorical('batch_size', [32, 64, 128]),
+        'focal_gamma':   trial.suggest_float('gamma', 1.0, 5.0),
+        'shared_dims':   trial.suggest_categorical('dims', [
+                             [1024, 512, 256], 
+                             [512, 256, 128]
+                         ]),
+        'weight_decay':  trial.suggest_float('weight_decay', 1e-6, 1e-3, log=True)
     }
-    # Evaluate on macro AUPRC (scaffold-split validation set)
-    score = cross_val_auprc(params, X_train, Y_train)
+    
+    # Train ToxNet with these params and evaluate on macro AUPRC
+    score = cross_val_auprc_toxnet(params, X_train, Y_train)
     return score  # Maximize AUPRC
 
 study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=100)
+study.optimize(objective, n_trials=50)
 ```
 
 ---
@@ -359,9 +420,48 @@ def tune_threshold(y_true, y_prob, recall_floor=0.85):
 
 ## Phase 6 — Prescription Pipeline
 
+### Phase 6 — Note on ChEMBL API
+
+> [!WARNING]
+> The prescription pipeline previously queried ChEMBL live in the Streamlit dashboard. ChEMBL enforces rate limiting and common fragments return hundreds of results. This causes the dashboard to hang or crash. The correct approach is a **one-time cache build** run as an offline script, saved as a local database or pickle, and queried locally at runtime.
+
+```python
+# OFFLINE SCRIPT (run once, not in dashboard):
+# build_chembl_cache.py
+
+from chembl_webresource_client.new_client import new_client
+import pickle
+
+FRAGMENT_QUERIES = [
+    'Nc1ccccc1',     # Aniline
+    '[NX3](=O)=O',   # Nitro
+    'c1ccc(F)cc1',   # Fluorobenzene
+    'c1ccc(O)cc1',   # Phenol
+]
+
+cache = {}
+for frag in FRAGMENT_QUERIES:
+    molecule = new_client.molecule
+    results = molecule.filter(
+        molecule_structures__canonical_smiles__contains=frag
+    ).only(['molecule_chembl_id', 'molecule_structures', 'molecule_properties'])
+    cache[frag] = [
+        {'chembl_id': r['molecule_chembl_id'],
+         'smiles':    r['molecule_structures']['canonical_smiles'],
+         'mw':        r.get('molecule_properties', {}).get('full_mwt'),
+         'logp':      r.get('molecule_properties', {}).get('alogp')}
+        for r in results[:50]  # Cap per fragment
+    ]
+
+with open('chembl_cache.pkl', 'wb') as f:
+    pickle.dump(cache, f)
+
+# IN DASHBOARD (fast, no API call):
+# with open('chembl_cache.pkl', 'rb') as f:
+#     CHEMBL_CACHE = pickle.load(f)
 ### The 4-Step Corrected Flow
 
-```
+```text
 Step 1: Predict all 12 endpoints → SHAP per endpoint
 Step 1b: Cross-validate SHAP against Brenk + PAINS + OCHEM alerts
          → Flag low-confidence attributions (Zhang et al. open problem)
@@ -370,14 +470,17 @@ Step 1b: Cross-validate SHAP against Brenk + PAINS + OCHEM alerts
 Step 2: Map top SHAP bit → molecular fragment (RDKit atom-info)
 
 Step 3: Query ChEMBL API for compounds containing replacement fragment
-         → Filter: SAScore < 4.0 (synthesizability gate)
+         → Filter A (Synthesizability): SAScore < 4.0
+         → Filter B (Pharmacokinetics): |ΔLogP| < 0.5 and |ΔMW| < 25 Da 
+           (Prevents bioisosteres that destroy drug absorption/efficacy)
          → Flag: Tanimoto to DrugBank < 0.4 (out-of-pharma-space warning)
 
 Step 4: Re-predict all 12 endpoints for each viable candidate
          → Temperature-scaled calibrated probabilities
+         → Apply "Intended Mechanism" override (ignore flags if target is intentional)
          → OOD detection via Tanimoto to training set
          → Pareto dominance classification
-         → Output: sorted Pareto front with uncertainty intervals
+         → Output: sorted Pareto front with ADME metrics and uncertainty intervals
 ```
 
 ### Cyto-Safe Differentiation (One Sentence)
@@ -392,13 +495,15 @@ Step 4: Re-predict all 12 endpoints for each viable candidate
 | Panel | Content | Technical Source |
 |-------|---------|-----------------|
 | Molecule viewer | 2D structure + flagged atoms | RDKit Draw + SHAP atoms |
+| Therapeutic Override | Dropdown to ignore specific endpoints | User Input (Biological fix) |
 | Radar chart | 12-endpoint toxicity profile | Plotly radar |
 | Prescription table | Ranked Pareto candidates | Pipeline step 4 |
+| ADME Preservation | ΔLogP, ΔMolecular Weight | RDKit Descriptors |
 | Endpoint delta grid | Per-endpoint before/after | Pareto evaluation |
 | Uncertainty bands | [lower, upper] per endpoint | Temperature scaling + OOD |
 | SHAP confidence | HIGH/MEDIUM/LOW + alert name | Alert cross-validation |
 | Coverage warning | Pharma-space proximity | DrugBank Tanimoto |
-| Scope disclaimer | Hardcoded regulatory text | Flaw 5 correction |
+| Scope disclaimer | In-vitro vs In-vivo metabolite warning | Hardcoded regulatory text |
 
 ---
 
@@ -468,10 +573,11 @@ dependencies:
     - shap
     - torch
     - torchvision
+    - skorch                          # Scikit-learn wrapper for PyTorch (Required for MAPIE)
     - streamlit
     - plotly
-    - chembl-webresource-client       # Bioisostere validation
-    - nonconformist                   # Conformal prediction
+    - chembl-webresource-client       # Bioisostere cache building (one-time)
+    - mapie                           # Conformal prediction (replaces nonconformist)
     - deepchem                        # Optional: scaffold loader
 ```
 

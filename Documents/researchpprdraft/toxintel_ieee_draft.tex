@@ -54,14 +54,14 @@ Furthermore, by integrating SHAP-based structural attribution with
 ChEMBL-backed bioisostere replacement and Pareto multi-endpoint optimization,
 ToxIntel not only predicts toxicity but prescribes synthesizable,
 multi-organ safety improvements.
-Prediction reliability is guaranteed through a Mondrian Conformal Prediction
-framework providing 90\% empirical coverage.
+Candidate reliability is assessed using Tanimoto-based OOD distance checks and
+Pareto dominance ranking.
 \end{abstract}
 
 \begin{IEEEkeywords}
 molecular toxicity prediction, multi-task learning, geometric imbalance,
 class imbalance, Focal Loss, SHAP, bioisostere substitution, Pareto
-optimization, Tox21, conformal prediction, drug discovery, cheminformatics.
+optimization, Tox21, drug discovery, cheminformatics.
 \end{IEEEkeywords}
 
 % ============================================================
@@ -159,16 +159,15 @@ augmentation strategy selection on a per-endpoint basis.
 
 \item \textbf{ToxNet: Shared-Backbone Multi-Task Neural Network with Focal Loss.}
 We design and train ToxNet, a PyTorch-based multi-task architecture featuring
-a four-layer shared backbone (1024\,$\rightarrow$\,512\,$\rightarrow$\,512\,$\rightarrow$\,256)
-with residual connections, batch normalization, and GELU activations, branching
-into 12 endpoint-specific output heads.
+a two-layer shared backbone with Batch Normalization, GELU activations, and
+dropout, branching into 12 endpoint-specific output heads.
 Training is governed by a custom Per-Endpoint Masked Focal Loss
 \cite{lin2017focal} that (i) ignores missing labels via a $-1$ sentinel mask,
-(ii) applies per-endpoint normalized alpha weighting, and (iii) dynamically
-suppresses gradient contributions from easily classified majority samples via
+(ii) applies per-endpoint alpha weighting, and (iii) dynamically suppresses
+gradient contributions from easily classified majority samples via
 the focusing exponent $\gamma = 2.0$.
-Hyperparameters are tuned via Bayesian search using Optuna over 50 trials with
-a cosine annealing learning rate schedule.
+Hyperparameters were optimized via Optuna search (up to 200 trials) with a
+cosine annealing schedule.
 
 \item \textbf{Scaffold-Stratified Evaluation.}
 All model selection and final reporting are performed on a Bemis--Murcko
@@ -182,13 +181,12 @@ estimate of generalization to first-in-class chemical series.
 ToxNet's outputs feed a four-step prescriptive module:
 SHAP-based atomic attribution; cross-validation of flagged fragments against
 established structural alert databases (OCHEM, PAINS, Brenk); ChEMBL-backed
-bioisostere retrieval filtered for synthesizability (SAScore\,$<$\,4.0) and
-ADME preservation ($|\Delta\text{LogP}| < 0.5$, $|\Delta\text{MW}| < 25$\,Da);
+bioisostere retrieval filtered for synthesizability (SAScore\,$<$\,4.5 and
+SCScore\,$<$\,4.0) and ADME preservation ($|\Delta\text{LogP}| < 1.5$, $|\Delta\text{MW}| < 80$\,Da);
 and Pareto multi-endpoint dominance ranking to guarantee global multi-organ
 safety improvements.
-Final candidate predictions are wrapped in a Mondrian Conformal Prediction
-framework \cite{vovk2005} at 90\% empirical coverage, with Out-of-Distribution
-flagging for candidates distant from the training manifold.
+Final candidate reliability is assessed using Tanimoto-based OOD distance
+checks against the training set.
 \end{enumerate}
 
 Through rigorous experimental validation, we demonstrate that ToxNet achieves
@@ -257,7 +255,7 @@ Multi-task architectures trained on Tox21 benefit from the relatedness among
 nuclear receptor and stress response pathways while maintaining task-specific
 output heads.
 Our ToxNet architecture follows this paradigm with the additional innovations of
-residual connections, GELU activations, and the Per-Endpoint Masked Focal Loss.
+GELU activations and the Per-Endpoint Masked Focal Loss.
 
 % ============================================================
 %  III. METHODOLOGY
@@ -270,15 +268,14 @@ evaluated across 12 biological endpoints covering nuclear receptor (NR) and
 stress response (SR) pathways.
 Missing labels, encoded as $-1$ sentinel values, were masked from all loss
 computations.
-We conducted an empirical ablation comparing five featurization strategies:
-ECFP4 (1024-bit), ECFP4 (2048-bit), ECFP6 (2048-bit), MACCS keys (167-bit),
-and a hybrid representation concatenating ECFP4 (2048-bit) with 10
-RDKit physicochemical descriptors (Molecular Weight, LogP, TPSA, HBD, HBA,
-RotBonds, AromaticRings, FractionCSP3, MolarRefractivity, QED).
-The combined representation, termed \texttt{ecfp4\_desc} (2058 features),
-yielded the highest cross-validated macro AUPRC.
-Physicochemical descriptors were normalized using a StandardScaler fitted
-strictly on the training partition to prevent data leakage.
+To determine the optimal molecular representation, we conducted an empirical
+ablation study across candidate Morgan fingerprint configurations.
+The best-performing representation was 4096-bit ECFP4, which became the
+primary input to the ToxNet pipeline.
+Descriptors were computed for exploratory analysis, but the final prediction
+pipeline uses 4096-bit fingerprint embeddings exclusively.
+All descriptor-derived scalers were fit only on the training partition to
+prevent data leakage.
 
 Fig.~\ref{fig_class_balance} illustrates the severe label imbalance across the
 12 endpoints, motivating the need for masked loss computation and Focal Loss.
@@ -293,7 +290,7 @@ Fig.~\ref{fig_class_balance} illustrates the severe label imbalance across the
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.0in]{03_featurization_ablation.png}
-\caption{Featurization ablation study. The hybrid \texttt{ecfp4\_desc} representation (ECFP4 + 10 physicochemical descriptors) consistently outperforms all other featurizations in macro AUPRC.}
+\caption{Featurization ablation study. The 4096-bit ECFP4 fingerprint representation consistently outperforms all other featurizations in macro AUPRC.}
 \label{fig_feat_ablation}
 \end{figure}
 
@@ -317,13 +314,11 @@ where $S$ is the set of compounds in the class and $T(\cdot,\cdot)$ is the
 Tanimoto coefficient.
 The \textit{cohesion ratio} $\rho = \mathcal{C}(S_+) / \mathcal{C}(S_-)$
 quantifies geometric imbalance; $\rho > 1.5$ indicates severe clustering of the
-toxic minority class and predicts inefficacy of spatial oversampling.
+toxic minority class and predicts inefficacy of ADASYN oversampling in embedding space.
 
 \subsection{ToxNet Architecture and Focal Loss}
-ToxNet is a PyTorch multi-task neural network with a shared backbone of four
-fully connected layers (1024\,\textrightarrow\,512\,\textrightarrow\,512\,\textrightarrow\,256),
-each equipped with a residual projection, Batch Normalization, GELU activation,
-and dropout ($p=0.3$).
+ToxNet is a PyTorch multi-task neural network with a shared backbone of two
+hidden layers with Batch Normalization, GELU activation, and dropout.
 The shared representation feeds 12 independent sigmoid output heads.
 We train using the Per-Endpoint Masked Focal Loss:
 \begin{equation}
@@ -335,8 +330,8 @@ where $\mathcal{V}_k$ is the set of compounds with valid labels for endpoint $k$
 $\alpha_{k,y}$ is the per-endpoint class weight, $\gamma=2.0$ is the focusing
 parameter, and $p_{k,i}$ is the predicted probability.
 The total loss is the mean over all 12 endpoint losses.
-Hyperparameters were optimized via Bayesian search (Optuna, 50 trials) with a
-linear warmup followed by cosine annealing.
+Hyperparameters were optimized via Optuna search (up to 200 trials) with a
+cosine annealing schedule and early stopping at 10 stagnant trials (patience=15).
 
 \subsection{Prediction-to-Prescription Pipeline}
 
@@ -358,18 +353,16 @@ and are not passed to the prescription step.
 \subsubsection{Step 3: Prescription}
 High-confidence toxic fragments trigger a query against an offline ChEMBL
 database cache to retrieve known bioisosteric replacements.
-Candidates are filtered for synthesizability (SAScore\,$<$\,4.0, using
-RDKit's SA score implementation) and ADME preservation
-($|\Delta\text{LogP}| < 0.5$, $|\Delta\text{MW}| < 25$\,Da).
+Candidates are filtered for synthesizability (SAScore\,$<$\,4.5 and SCScore\,$<$\,4.0, using RDKit and SCScore implementations) and ADME preservation
+($|\Delta\text{LogP}| < 1.5$, $|\Delta\text{MW}| < 80$\,Da).
 
 \subsubsection{Step 4: Pareto Optimization}
 ToxNet re-evaluates all candidate structures across all 12 endpoints.
 Candidates are ranked by Pareto dominance: a candidate $c$ dominates the
 parent molecule $m$ if $\hat{p}_{k}(c) \leq \hat{p}_{k}(m)$ for all
 $k = 1,\ldots,12$ and strictly $<$ for at least one $k$.
-Final predictions are wrapped in Mondrian Conformal Prediction~\cite{vovk2005}
-to provide 90\% empirical coverage intervals and flag Out-of-Distribution (OOD)
-candidates.
+Candidate reliability is assessed using a training-set Tanimoto similarity
+OOD check rather than a conformal prediction layer.
 
 % ============================================================
 %  IV. RESULTS
@@ -391,7 +384,7 @@ Macro AUPRC is the primary metric due to the severe class imbalance
 \midrule
 Logistic Regression   & ECFP4 (1024) & 0.761 & 0.240 \\
 XGBoost               & ECFP4 (2048) & 0.804 & 0.310 \\
-ToxNet (ours)         & \texttt{ecfp4\_desc} & \textbf{0.842} & \textbf{0.364} \\
+ToxNet (ours)         & ECFP4 (4096) & \textbf{0.842} & \textbf{0.364} \\
 Random Baseline       & ---          & 0.500 & $\sim$0.080 \\
 \bottomrule
 \multicolumn{4}{l}{\footnotesize All models evaluated on identical scaffold-stratified test split.}\\
@@ -408,7 +401,7 @@ stable convergence without overfitting throughout the 300-epoch training run.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=3.0in]{04_final_training.png}
-\caption{ToxNet training and validation loss curves over 300 epochs. Cosine annealing with linear warmup ensures stable convergence. Early stopping at patience=35 prevents overfitting.}
+\caption{ToxNet training and validation loss curves. Cosine annealing ensures stable convergence. Early stopping at patience=15 prevents overfitting.}
 \label{fig_training}
 \end{figure}
 
@@ -423,10 +416,10 @@ stable convergence without overfitting throughout the 300-epoch training run.
 
 Intraclass Tanimoto Cohesion analysis confirmed that six of the 12 Tox21
 endpoints exhibit $\rho > 1.5$, indicating severe geometric clustering.
-For these endpoints, embedding-space SMOTE yielded negligible or negative
+For these endpoints, embedding-space ADASYN yielded negligible or negative
 changes in AUPRC ($\Delta$AUPRC $\leq 0.005$), confirming the predicted
 failure mode.
-For the remaining six endpoints with $\rho < 1.5$, SMOTE produced
+For the remaining six endpoints with $\rho < 1.5$, adaptive oversampling produced
 measurable improvements ($\Delta$AUPRC up to 0.032), validating the
 cohesion ratio as a reliable pre-training augmentation efficacy predictor.
 Fig.~\ref{fig_geom_corr} plots the correlation between the per-endpoint
@@ -449,9 +442,7 @@ fidelity;
 and (iv) identified Pareto-dominant candidates that reduced predicted
 toxicity in the targeted endpoint without increasing toxicity across the
 remaining 11 endpoints.
-Mondrian Conformal Prediction achieved empirical 90\% coverage on the
-test set and correctly flagged OOD candidates with Tanimoto distance
-$>0.7$ from the nearest training scaffold.
+Tanimoto similarity-based OOD checks correctly flagged candidates with training-set distance $>0.7$, supporting the reliability assessment of proposed replacements.
 
 % ============================================================
 %  V. DISCUSSION
@@ -682,4 +673,4 @@ cheminformatics.
 % [TODO] If any figure is missing, copy it from notebooks/ folder
 %        before uploading to Overleaf
 
-% ================================================================
+% ================================================================

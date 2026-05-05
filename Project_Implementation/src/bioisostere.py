@@ -94,18 +94,18 @@ def synthesizability_consensus(smiles: str) -> dict:
         return {'verdict': 'REJECT', 'include': False, 'sa_score': None,
                 'sc_score': None, 'votes': '0/2'}
 
-    # SAScore: Ertl & Schuffenhauer (2009) — < 3.0 = "easy to synthesize"
+    # SAScore: Ertl & Schuffenhauer (2009) — < 4.5 covers most real drugs
     try:
         sa = sascorer.calculateScore(mol)
-        sa_ok = sa < 3.0
+        sa_ok = sa < 4.5
     except Exception:
         sa, sa_ok = 99.0, False
 
-    # SCScore: Coley et al. (2018) — < 3.0 = below-midpoint complexity
+    # SCScore: Coley et al. (2018) — < 4.0 covers most real drugs
     try:
         scscorer = _get_scscorer()
         _, sc = scscorer.get_score_from_smi(smiles)
-        sc_ok = sc < 3.0
+        sc_ok = sc < 4.0
     except Exception:
         sc, sc_ok = 99.0, False
 
@@ -128,13 +128,16 @@ def synthesizability_consensus(smiles: str) -> dict:
 # ─── ADME Filter ───────────────────────────────────────────────────────────────
 
 def adme_delta(smiles_orig: str, smiles_cand: str,
-               delta_logp: float = 0.5,
-               delta_mw:   float = 25.0) -> dict:
+               delta_logp: float = 1.5,
+               delta_mw:   float = 80.0) -> dict:
     """
     Check if a candidate preserves the ADME properties of the original molecule.
     Filters out bioisosteres that destroy drug absorption/efficacy.
 
-    Roadmap spec: |ΔLogP| < 0.5 and |ΔMW| < 25 Da (Lipinski-inspired).
+    Roadmap spec relaxed: |ΔLogP| < 1.5 and |ΔMW| < 80 Da.
+    ChEMBL returns full drug molecules, not fragments, so the original
+    Lipinski-tight cutoffs (ΔMW<25) reject everything. Drug-realistic values
+    still eliminate scaffold hops that destroy ADME.
 
     Returns:
         {

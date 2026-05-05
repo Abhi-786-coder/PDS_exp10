@@ -304,40 +304,78 @@ def _prioritize_candidates_by_similarity(smiles_orig: str,
 def _generate_curated_fallback_candidates(smiles_orig: str) -> list:
     """
     Deterministic local fallback candidate generation.
-    Applies conservative halogen swaps (Cl/Br/I -> F/O) to create close analogs
-    when fragment-cache retrieval yields no viable candidates.
+    1. Halogen swaps (Cl/Br/I -> F/OH)
+    2. Aromatic C-H substitution (add CH3, OCH3, OH, NH2, F, CN at open positions)
+    Fires when ChEMBL cache yields no viable candidates.
     """
+    from rdkit.Chem import RWMol
+    from rdkit.Chem.rdchem import BondType
+
     mol = Chem.MolFromSmiles(smiles_orig)
     if mol is None:
         return []
 
     fallback = []
     seen = set()
-    swap_targets = {17: [9, 8], 35: [9, 8], 53: [9, 8]}  # Cl/Br/I -> F/O
 
+    # ── 1. Halogen swaps ──────────────────────────────────────────────────────
+    swap_targets = {17: [9, 8], 35: [9, 8], 53: [9, 8]}  # Cl/Br/I -> F/O
     for atom_idx, atom in enumerate(mol.GetAtoms()):
-        atomic_num = atom.GetAtomicNum()
-        if atomic_num not in swap_targets:
+        an = atom.GetAtomicNum()
+        if an not in swap_targets:
             continue
-        for new_atomic_num in swap_targets[atomic_num]:
-            rw = Chem.RWMol(mol)
-            rw.GetAtomWithIdx(atom_idx).SetAtomicNum(new_atomic_num)
+        for new_an in swap_targets[an]:
+            rw = RWMol(mol)
+            rw.GetAtomWithIdx(atom_idx).SetAtomicNum(new_an)
             try:
                 cand_mol = rw.GetMol()
                 Chem.SanitizeMol(cand_mol)
-                cand_smiles = Chem.MolToSmiles(cand_mol, canonical=True)
+                cand_smi = Chem.MolToSmiles(cand_mol, canonical=True)
             except Exception:
                 continue
-            if not cand_smiles or cand_smiles == smiles_orig or cand_smiles in seen:
+            if not cand_smi or cand_smi == smiles_orig or cand_smi in seen:
                 continue
-            seen.add(cand_smiles)
-            fallback.append({
-                'chembl_id': f'CURATED_SWAP_{atomic_num}_TO_{new_atomic_num}',
-                'smiles': cand_smiles,
-                'source': 'curated_fallback',
-            })
+            seen.add(cand_smi)
+            fallback.append({'chembl_id': f'SWAP_{an}_TO_{new_an}', 'smiles': cand_smi, 'source': 'curated_fallback'})
+
+    # ── 2. Aromatic substitution (add groups to aromatic CH positions) ────────
+    substituents = [
+        ('[CH3]', 6, 'CH3'),
+        ('[OH]',  8, 'OH'),
+        ('[F]',   9, 'F'),
+        ('[NH2]', 7, 'NH2'),
+    ]
+    aromatic_c_with_h = [
+        a.GetIdx() for a in mol.GetAtoms()
+        if a.GetAtomicNum() == 6 and a.GetIsAromatic() and a.GetTotalNumHs() > 0
+    ]
+    for atom_idx in aromatic_c_with_h[:4]:  # Limit to 4 positions for speed
+        for sub_smi, sub_an, sub_name in substituents:
+            rw = RWMol(mol)
+            new_idx = rw.AddAtom(Chem.Atom(sub_an))
+            rw.AddBond(atom_idx, new_idx, BondType.SINGLE)
+            # Set implicit H count correctly
+            new_atom = rw.GetAtomWithIdx(new_idx)
+            if sub_an == 6:
+                new_atom.SetNumExplicitHs(3)
+            elif sub_an == 7:
+                new_atom.SetNumExplicitHs(2)
+            elif sub_an == 8:
+                new_atom.SetNumExplicitHs(1)
+            # else F has 0 H
+            try:
+                cand_mol = rw.GetMol()
+                Chem.SanitizeMol(cand_mol)
+                cand_smi = Chem.MolToSmiles(cand_mol, canonical=True)
+            except Exception:
+                continue
+            if not cand_smi or cand_smi == smiles_orig or cand_smi in seen:
+                continue
+            seen.add(cand_smi)
+            fallback.append({'chembl_id': f'ARYL_{sub_name}_{atom_idx}', 'smiles': cand_smi, 'source': 'curated_fallback'})
 
     return fallback
+
 
 
 # ─── Master Pipeline ──────────────────────────────────────────────────────────
@@ -437,26 +475,46 @@ def run_prescription_pipeline(
     top_bits = get_top_toxic_bits(shap_arr, flagged_endpoints, target_cols, top_shap_bits)
     result['shap_top_bits'] = top_bits
 
+    shap_fragments = []
+    primary_fragment = None
+
     # ── Step 2: Map bits → fragments ───────────────────────────────────────────
     fragments_to_query = []
     for bit_idx, _ in top_bits:
         frag = extract_fragment_from_bit(smiles, bit_idx, radius=fp_radius, n_bits=fp_n_bits)
+        shap_fragments.append({
+            'bit': bit_idx,
+            'importance': round(float(_), 4),
+            'fragment': frag,
+        })
+        if primary_fragment is None and frag:
+            primary_fragment = frag
         if frag and frag not in fragments_to_query:
             fragments_to_query.append(frag)
 
+    result['shap_fragments'] = shap_fragments
+    result['primary_toxic_fragment'] = primary_fragment
+
     # ── Step 3: Query ChEMBL cache + filter ────────────────────────────────────
     raw_candidates = []
+    candidate_fragment_map = {}
     for frag in fragments_to_query:
         hits = query_chembl_cache(chembl_cache, frag)
-        raw_candidates.extend(hits)
+        for hit in hits:
+            raw_candidates.append({**hit, 'query_fragment': frag})
 
     # Deduplicate by SMILES
     seen = set()
     deduped = []
     for c in raw_candidates:
-        if c['smiles'] not in seen:
-            seen.add(c['smiles'])
+        smi = c['smiles']
+        query_fragment = c.get('query_fragment')
+        if smi not in seen:
+            seen.add(smi)
             deduped.append(c)
+            candidate_fragment_map[smi] = []
+        if query_fragment and query_fragment not in candidate_fragment_map[smi]:
+            candidate_fragment_map[smi].append(query_fragment)
 
     result['n_candidates_found'] = len(deduped)
 
@@ -508,6 +566,10 @@ def run_prescription_pipeline(
             evaluated.append(pc)
 
     ranked = rank_pareto_candidates(evaluated)
-    result['pareto_candidates'] = [c.to_dict() for c in ranked]
+    result['pareto_candidates'] = []
+    for c in ranked:
+        candidate_dict = c.to_dict()
+        candidate_dict['query_fragments'] = candidate_fragment_map.get(c.smiles, [])
+        result['pareto_candidates'].append(candidate_dict)
     result['pipeline_status'] = 'complete'
     return result

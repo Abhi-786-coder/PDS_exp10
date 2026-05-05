@@ -1,0 +1,8 @@
+smiles,reason
+O=[N+]([O-])/C=C/c1ccccc1,"Invariant Violation
+	could not find atom1
+	Violation occurred on line 222 in file Code/GraphMol/Canon.cpp
+	Failed Expression: firstFromAtom1
+	RDKIT: 2024.03.1
+	BOOST: 1_78
+"

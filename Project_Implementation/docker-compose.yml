@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  tox21_engine:
+    build: .
+    container_name: tox21_env_container
+    runtime: nvidia
+    volumes:
+      - .:/workspace
+    ports:
+      - "8888:8888"
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - JUPYTER_TOKEN=tox21
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - CUDA_VISIBLE_DEVICES=0
+    # Combined command to run API in background and Jupyter in foreground
+    command: >
+      sh -c "python src/api.py & 
+             jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=tox21"

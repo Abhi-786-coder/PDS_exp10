@@ -1,585 +1,832 @@
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 13, in <module>
-    from src.explain import load_pipeline_from_artifact
-  File "/workspace/src/explain.py", line 37, in <module>
-    import shap
-  File "/opt/conda/lib/python3.11/site-packages/shap/__init__.py", line 4, in <module>
-    from .explainers import other
-  File "/opt/conda/lib/python3.11/site-packages/shap/explainers/__init__.py", line 4, in <module>
-    from ._gpu_tree import GPUTreeExplainer
-  File "/opt/conda/lib/python3.11/site-packages/shap/explainers/_gpu_tree.py", line 5, in <module>
-    from ._tree import (
-  File "/opt/conda/lib/python3.11/site-packages/shap/explainers/_tree.py", line 29, in <module>
-    from .. import _cext
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 46, in <module>
-    from rdkit import Chem
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/__init__.py", line 15, in <module>
-    from rdkit import DataStructs, RDConfig, rdBase
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/DataStructs/__init__.py", line 13, in <module>
-    from rdkit.DataStructs import cDataStructs
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 46, in <module>
-    from rdkit import Chem
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/__init__.py", line 16, in <module>
-    from rdkit.Chem import rdchem
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 46, in <module>
-    from rdkit import Chem
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/__init__.py", line 24, in <module>
-    from rdkit.Chem.rdmolops import *
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/AllChem.py", line 22, in <module>
-    from rdkit.Chem.EnumerateStereoisomers import (EnumerateStereoisomers,
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/EnumerateStereoisomers.py", line 4, in <module>
-    from rdkit.Chem.rdDistGeom import EmbedMolecule
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/AllChem.py", line 25, in <module>
-    from rdkit.Chem.rdDepictor import *
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/AllChem.py", line 27, in <module>
-    from rdkit.Chem.rdFingerprintGenerator import *
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/AllChem.py", line 29, in <module>
-    from rdkit.Chem.rdMolAlign import *
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/AllChem.py", line 32, in <module>
-    from rdkit.Chem.rdMolTransforms import *
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/AllChem.py", line 35, in <module>
-    from rdkit.Chem.rdReducedGraphs import *
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/AllChem.py", line 36, in <module>
-    from rdkit.Chem.rdShapeHelpers import *
-AttributeError: _ARRAY_API not found
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/conda/bin/uvicorn", line 8, in <module>
-    sys.exit(main())
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1514, in __call__
-    return self.main(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1435, in main
-    rv = self.invoke(ctx)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 1298, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/opt/conda/lib/python3.11/site-packages/click/core.py", line 853, in invoke
-    return callback(*args, **kwargs)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 441, in main
-    run(
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/main.py", line 617, in run
-    server.run()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
-    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
-    return runner.run(main)
-  File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
-    await self._serve(sockets)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
-    config.load()
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/config.py", line 449, in load
-    self.loaded_app = import_from_string(self.app)
-  File "/opt/conda/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "/opt/conda/lib/python3.11/importlib/__init__.py", line 126, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-  File "/workspace/src/api.py", line 14, in <module>
-    from src.bioisostere import load_chembl_cache
-  File "/workspace/src/bioisostere.py", line 47, in <module>
-    from rdkit.Chem import AllChem, Descriptors, RDConfig
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/Descriptors.py", line 238, in <module>
-    _setupDescriptors(locals())
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/Descriptors.py", line 33, in _setupDescriptors
-    from rdkit.Chem import (Crippen, Descriptors3D, Fragments, GraphDescriptors,
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/Chem/GraphDescriptors.py", line 23, in <module>
-    from rdkit.ML.InfoTheory import entropy
-  File "/opt/conda/lib/python3.11/site-packages/rdkit/ML/InfoTheory/__init__.py", line 4, in <module>
-    from rdkit.ML.InfoTheory.rdInfoTheory import *
-AttributeError: _ARRAY_API not found
-INFO:     Started server process [98]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
+INFO:     Will watch for changes in these directories: ['/workspace']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-[17:03:37] DEPRECATION WARNING: please use MorganGenerator
+INFO:     Started reloader process [546] using WatchFiles
+INFO:     Started server process [594]
+INFO:     Waiting for application startup.
+Trying to unpickle estimator StandardScaler from version 1.5.0 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+INFO:     Application startup complete.
+[20:02:13] DEPRECATION WARNING: please use MorganGenerator
+[20:02:15] DEPRECATION WARNING: please use MorganGenerator
+[20:02:15] DEPRECATION WARNING: please use MorganGenerator
+[20:02:15] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:25] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:27] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:28] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:29] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+[20:02:30] DEPRECATION WARNING: please use MorganGenerator
+🚀 Starting ToxNet Prescription Engine API...
+GPU active: NVIDIA GeForce RTX 5050 Laptop GPU
+Loading model to cuda...
+Loading training fingerprints...
+Loading ChEMBL bioisostere cache...
+✅ STBI artifact loaded (311 scaffolds).
+✅ Constellation artifact loaded (5 constellations).
+✅ API is ready to receive requests.
+  [!] Cache miss for cN. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+Restored variables from /workspace/src/../scscore/models/full_reaxys_model_1024bool/model.ckpt-10654.as_numpy.json.gz
+INFO:     127.0.0.1:33416 - "POST /analyze HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'scripts/test_frameworks.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [594]
+INFO:     Started server process [672]
+INFO:     Waiting for application startup.
+Trying to unpickle estimator StandardScaler from version 1.5.0 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+INFO:     Application startup complete.
+🚀 Starting ToxNet Prescription Engine API...
+GPU active: NVIDIA GeForce RTX 5050 Laptop GPU
+Loading model to cuda...
+Loading training fingerprints...
+Loading ChEMBL bioisostere cache...
+✅ STBI artifact loaded (311 scaffolds).
+✅ Constellation artifact loaded (5 constellations).
+✅ API is ready to receive requests.
+INFO:     172.18.0.1:53686 - "OPTIONS /analyze HTTP/1.1" 200 OK
+[20:04:15] DEPRECATION WARNING: please use MorganGenerator
+[20:04:17] DEPRECATION WARNING: please use MorganGenerator
+[20:04:17] DEPRECATION WARNING: please use MorganGenerator
+[20:04:17] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:21] DEPRECATION WARNING: please use MorganGenerator
+[20:04:22] DEPRECATION WARNING: please use MorganGenerator
+[20:04:23] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:24] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:25] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+[20:04:26] DEPRECATION WARNING: please use MorganGenerator
+  [!] Cache miss for cN. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+Restored variables from /workspace/src/../scscore/models/full_reaxys_model_1024bool/model.ckpt-10654.as_numpy.json.gz
+INFO:     172.18.0.1:53686 - "POST /analyze HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'src/api.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [672]
+INFO:     Started server process [725]
+INFO:     Waiting for application startup.
+Trying to unpickle estimator StandardScaler from version 1.5.0 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+INFO:     Application startup complete.
+🚀 Starting ToxNet Prescription Engine API...
+GPU active: NVIDIA GeForce RTX 5050 Laptop GPU
+Loading model to cuda...
+Loading training fingerprints...
+Loading ChEMBL bioisostere cache...
+✅ STBI artifact loaded (311 scaffolds).
+✅ Constellation artifact loaded (5 constellations).
+✅ API is ready to receive requests.
+INFO:     172.18.0.1:51180 - "OPTIONS /analyze HTTP/1.1" 200 OK
+[20:44:54] DEPRECATION WARNING: please use MorganGenerator
+[20:44:56] DEPRECATION WARNING: please use MorganGenerator
+[20:44:56] DEPRECATION WARNING: please use MorganGenerator
+[20:44:56] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:44:59] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:01] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:02] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+  [!] Cache miss for cC(c)=C. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+  [!] Cache miss for cC(=C)C. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+Restored variables from /workspace/src/../scscore/models/full_reaxys_model_1024bool/model.ckpt-10654.as_numpy.json.gz
+INFO:     172.18.0.1:51180 - "POST /analyze HTTP/1.1" 200 OK
+INFO:     172.18.0.1:51180 - "OPTIONS /mol3d HTTP/1.1" 200 OK
+[20:45:03] DEPRECATION WARNING: please use MorganGenerator
+unrecognized nn.Module: GELU
+SHAP failed for mol3d: The SHAP explanations do not sum up to the model's output! This is either because of a rounding error or because an operator in your computation graph was not fully supported. If the sum difference of %f is significant compared to the scale of your model outputs, please post as a github issue, with a reproducible example so we can debug it. Used framework: pytorch - Max. diff: 0.016141143101120414 - Tolerance: 0.01. Using uniform zero scores.
+INFO:     172.18.0.1:51180 - "POST /mol3d HTTP/1.1" 200 OK
+[20:50:12] DEPRECATION WARNING: please use MorganGenerator
+SHAP failed for mol3d: The SHAP explanations do not sum up to the model's output! This is either because of a rounding error or because an operator in your computation graph was not fully supported. If the sum difference of %f is significant compared to the scale of your model outputs, please post as a github issue, with a reproducible example so we can debug it. Used framework: pytorch - Max. diff: 0.016141143101120414 - Tolerance: 0.01. Using uniform zero scores.
+INFO:     172.18.0.1:47624 - "POST /mol3d HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'src/api.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [725]
+INFO:     Started server process [778]
+INFO:     Waiting for application startup.
+Trying to unpickle estimator StandardScaler from version 1.5.0 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+INFO:     Application startup complete.
+🚀 Starting ToxNet Prescription Engine API...
+GPU active: NVIDIA GeForce RTX 5050 Laptop GPU
+Loading model to cuda...
+Loading training fingerprints...
+Loading ChEMBL bioisostere cache...
+✅ STBI artifact loaded (311 scaffolds).
+✅ Constellation artifact loaded (5 constellations).
+✅ API is ready to receive requests.
+INFO:     172.18.0.1:52650 - "OPTIONS /analyze HTTP/1.1" 200 OK
+[20:58:20] DEPRECATION WARNING: please use MorganGenerator
+[20:58:22] DEPRECATION WARNING: please use MorganGenerator
+[20:58:22] DEPRECATION WARNING: please use MorganGenerator
+[20:58:22] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:25] DEPRECATION WARNING: please use MorganGenerator
+[20:58:26] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:27] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+[20:58:28] DEPRECATION WARNING: please use MorganGenerator
+  [!] Cache miss for cC(c)=C. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+  [!] Cache miss for cC(=C)C. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+Restored variables from /workspace/src/../scscore/models/full_reaxys_model_1024bool/model.ckpt-10654.as_numpy.json.gz
+INFO:     172.18.0.1:52650 - "POST /analyze HTTP/1.1" 200 OK
+[20:58:58] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:58:59] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:00] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+  [!] Cache miss for cN. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+INFO:     172.18.0.1:60570 - "POST /analyze HTTP/1.1" 200 OK
+INFO:     172.18.0.1:60570 - "OPTIONS /mol3d HTTP/1.1" 200 OK
+[20:59:01] DEPRECATION WARNING: please use MorganGenerator
+[mol3d] Using 3 pre-computed SHAP bits. Max score: 1.0000
+[mol3d] Atom SHAP stats: max=1.0000 nonzero=7/7
+INFO:     172.18.0.1:60570 - "POST /mol3d HTTP/1.1" 200 OK
+INFO:     172.18.0.1:43954 - "OPTIONS /analyze HTTP/1.1" 200 OK
+[21:11:52] DEPRECATION WARNING: please use MorganGenerator
+[21:11:54] DEPRECATION WARNING: please use MorganGenerator
+[21:11:54] DEPRECATION WARNING: please use MorganGenerator
+[21:11:54] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:01] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+  [!] Cache miss for CC(C)c(cc)cc. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+INFO:     172.18.0.1:43954 - "POST /analyze HTTP/1.1" 200 OK
+INFO:     172.18.0.1:43954 - "OPTIONS /mol3d HTTP/1.1" 200 OK
+[21:12:02] DEPRECATION WARNING: please use MorganGenerator
+[mol3d] Using 3 pre-computed SHAP bits. Max score: 1.0000
+[mol3d] Atom SHAP stats: max=1.0000 nonzero=10/15
+INFO:     172.18.0.1:43954 - "POST /mol3d HTTP/1.1" 200 OK
+[21:15:09] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:10] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:11] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+[21:15:12] DEPRECATION WARNING: please use MorganGenerator
+  [!] Cache miss for cN. Querying ChEMBL API live...
+    → Found 0 live candidates. Updating cache...
+INFO:     172.18.0.1:34826 - "POST /analyze HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'src/api.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [778]
+INFO:     Started server process [831]
+INFO:     Waiting for application startup.
+Trying to unpickle estimator StandardScaler from version 1.5.0 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+INFO:     Application startup complete.

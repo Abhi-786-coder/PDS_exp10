@@ -4,7 +4,56 @@
 ---
 
 > [!IMPORTANT]
-> This document resolves four under-specifications flagged by the literature: representation choice, Cyto-Safe differentiation, database integration, and regulatory framing. Every claim is now traceable to a source in your extracted papers.
+> This document resolves four under-specifications flagged by the literature: representation choice, Cyto-Safe differentiation, database integration, and regulatory framing. Every claim is now traceable to a source in the web-harvested literature corpus.
+
+## How the Papers Are Extracted
+
+The literature layer should not depend only on a small hand-picked set of PDFs. The plan is to build a web-first paper corpus and then ground every claim in retrieved evidence.
+
+### Source Strategy
+
+- PubMed abstracts and metadata for peer-reviewed biomedical papers.
+- Crossref / DOI metadata for citation resolution and author-year normalization.
+- Semantic Scholar / OpenAlex for paper discovery, references, and related-work expansion.
+- Publisher PDFs when available through open-access links, institutional access, or author preprints.
+- arXiv / bioRxiv / medRxiv for preprints when a topic is too recent for journals.
+
+### Extraction Pipeline
+
+1. Search the web for seed topics such as Tox21, ToxNet, SHAP, Cyto-Safe, Barua imbalance, OCHEM, ChEMBL, and structural alerts.
+2. Pull metadata first, then resolve the best available full text.
+3. Extract text from PDF/HTML, preserving title, section, page, DOI, and source URL.
+4. Clean headers, footers, hyphenation, equations, and reference noise.
+5. Chunk by section and paragraph so retrieval stays citation-faithful.
+6. Embed chunks into a searchable index and retrieve only the most relevant passages at answer time.
+7. Use Ollama only after retrieval, so generation is grounded in the fetched passages rather than free-form guessing.
+
+### Why This Is Better
+
+- It scales beyond the few documents already in the repo.
+- It lets us pull in the latest internet literature instead of freezing the project at one static reading list.
+- It makes the final explanation layer auditable because every claim can carry a source URL, DOI, and page reference.
+
+### Critical Audit
+
+This approach is only valid if we are honest about its limits.
+
+- Not all papers are accessible. Many full texts are behind paywalls, so the system must work with abstracts, metadata, or preprints when full text cannot be legally obtained.
+- Full-text availability is biased. Open-access papers and preprints are overrepresented, while some high-value journal articles may be missing. That bias should be visible in the output.
+- OCR quality can corrupt chemistry terms, tables, and equations. Scanned PDFs need confidence checks, and low-quality pages should be flagged instead of silently trusted.
+- Reference extraction is noisy. Bibliographies, footnotes, and multi-column layouts can pollute chunking unless the parser is section-aware.
+- Web search is not neutral. Search ranking can hide relevant papers and overpromote highly cited but not necessarily most relevant work. Use multiple sources, not one engine.
+- Metadata-only records are not enough for claims. If we only have title and abstract, the system should mark the evidence as partial and avoid making strong mechanistic claims.
+- Paywall circumvention is not acceptable. The pipeline should use legal sources only: open-access PDFs, author manuscripts, abstracts, and metadata.
+- Internet literature is not the same as ground truth. The model should treat papers as evidence to summarize, not as facts to blindly internalize.
+- Domain drift is real. A paper on a different assay, endpoint, or species may look relevant semantically but be scientifically mismatched.
+
+### Acceptance Rules
+
+- Every retrieved claim should be tagged as one of: full text, abstract only, metadata only, or unresolved.
+- Every generated summary should expose the source list and confidence level.
+- Every paper chunk should retain its origin fields: DOI, URL, title, year, and page or section when available.
+- If the source quality is weak, the system should answer with uncertainty rather than overstate the evidence.
 
 ---
 
